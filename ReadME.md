@@ -4,5 +4,5 @@
     
     ```
         it`s the first game use by Javascript.
-        mean to know how the frame run and how to design the sys.
+        mean to know how the frame run and how the project design.
     ```

@@ -1,0 +1,24 @@
+{
+  "name": "joao_studio",
+  "version": "0.0.1",
+  "description": "profile to recode game building",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack --watch"
+  },
+  "keywords": [
+    "game",
+    "h5"
+  ],
+  "author": "murongqimiao@live.cn",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/murongqimiao/joaoStudio/issues"
+  },
+  "homepage": "https://github.com/murongqimiao/joaoStudio#readme",
+  "devDependencies": {
+    "webpack": "^5.64.0",
+    "webpack-cli": "^4.9.1"
+  }
+}
