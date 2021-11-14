@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/murongqimiao/joaoStudio#readme",
   "devDependencies": {
+    "copy-webpack-plugin": "^9.1.0",
     "webpack": "^5.64.0",
     "webpack-cli": "^4.9.1"
   }
