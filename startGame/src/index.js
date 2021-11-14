@@ -3,14 +3,15 @@ import { footMan, walking, getImageFromX_Y, CONSTANT_COMMON } from "./data"
 class Game {
     monsterList = []
     heroList = []
+    keyCollect = []
     constructor(props) {
 
     }
 
     run() {
         // 执行行为
-        this.monsterList.forEach(v => v.action && v.action())
-        this.heroList.forEach(v => v.action && v.action())
+        this.monsterList.forEach(v => v.action && v.action(this))
+        this.heroList.forEach(v => v.action && v.action(this))
 
         // 执行render
         const allRenderList = [].concat(this.monsterList).concat(this.heroList)
@@ -45,6 +46,17 @@ class Game {
         return this;
     }
 
+    keyActiveCollect(handle, key) {
+        if (handle === 'add') {
+            if (!this.keyCollect.includes(key)) { this.keyCollect.push(key) }
+        } else {
+            if (this.keyCollect.includes(key)) {
+                let index = this.keyCollect.indexOf(key)
+                this.keyCollect.splice(index, 1)
+            }
+        }
+    }
+
     // 钩子
     onMonsterAdd(monster) { }
     onHeroAdd(hero) {
@@ -62,6 +74,7 @@ class Role {
     curEvent = null // 记录当前执行的事件
     curRender = {
         imgClass: null,
+        imgLR: null,
         curFrameImgIndex: 0,
         curFrame: 0,
     } // 记录当前渲染内容
@@ -89,7 +102,7 @@ class Role {
     // 渲染逻辑 找到指定的某个图片 某一帧  渲染到canvas里
     render() {
         const { ctx } = arguments[0]
-        if (this.framesList[this.curEvent]) {
+        if (this.curEvent && this.framesList[this.curEvent]) {
             // 命中当前行为 进行渲染
             if (this.curRender.curFrame === this.framePerChange[this.curEvent]) { // 动画行进到下一张
                 if (this.curRender.curFrameImgIndex === this.framesList[this.curEvent].length - 1) { // 重复动画归0
@@ -101,12 +114,16 @@ class Role {
                 }
             }
             const { imgClass, imgLR } = this.framesList[this.curEvent][this.curRender.curFrameImgIndex]
-            const { sx, sy, swidth, sheight, width, height, } = getImageFromX_Y(imgClass, imgLR)
-            const Img = document.getElementsByClassName(imgClass)[0]
-            const { x, y } = this.position
-            ctx.drawImage(Img, sx, sy, swidth, sheight, x, y, width, height)
-            this.curRender.curFrame++
+            this.curRender.imgClass = imgClass
+            this.curRender.imgLR = imgLR
         }
+        this.curRender.curFrame++
+        const { sx, sy, swidth, sheight, width, height, } = getImageFromX_Y(this.curRender.imgClass, this.curRender.imgLR)
+        const Img = document.getElementsByClassName(this.curRender.imgClass)[0]
+        const { x, y } = this.position
+        ctx.drawImage(Img, sx, sy, swidth, sheight, x, y, width, height)
+        console.log(this.curRender.imgClass, x, y,)
+
     }
     addAction(eventName, func) {
         this[eventName] = func.bind(this)
@@ -121,12 +138,53 @@ footManNew.addPosition({ x: 0, y: 0, z: 0 }).addAction('action', walking)
 
 gameNew.addNewHero(footManNew)
 
+document.onkeydown = function (e) {    //对整个页面监听  
+    var keyNum = window.event ? e.keyCode : e.which;       //获取被按下的键值  
+    switch (keyNum) {
+        case 74: // J
+            gameNew.keyActiveCollect('add', 'J')
+            break;
+        case 75: // K
+            gameNew.keyActiveCollect('add', 'K')
+            break;
+        case 76: // L
+            gameNew.keyActiveCollect('add', 'L')
+            break
+        case 73: // I
+            gameNew.keyActiveCollect('add', 'I')
+            break
+        default: () => { }
+    }
+}
+document.onkeyup = (e) => { // 监听键盘抬起 停止对应行为
+    var keyNum = window.event ? e.keyCode : e.which;
+    switch (keyNum) {
+        case 74: // J
+            gameNew.keyActiveCollect('remove', 'J')
+            break;
+        case 75: // K
+            gameNew.keyActiveCollect('remove', 'K')
+            break;
+        case 76: // L
+            gameNew.keyActiveCollect('remove', 'L')
+            break
+        case 73: // I
+            gameNew.keyActiveCollect('remove', 'I')
+            break
+        default: () => { }
+    }
+}
+
+document.onkeypress = (e) => {
+    // console.log(e)
+}
 
 
 
 setTimeout(() => {
     gameNew.start()
 }, 1000)
+
 
 
 
