@@ -7,7 +7,7 @@ module.exports = {
     entry: path.resolve('./src/'),
     output: {
         path: path.resolve('./dist'),
-        filename: 'file.js',
+        filename: 'index.js',
         pathinfo: true
     },
     plugins: [
