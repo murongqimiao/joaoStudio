@@ -6,11 +6,14 @@ export const CONSTANT_COMMON = {
     BASE_HERO_SPD: 4,
     BASE_ONE_SECOND: 60,
     DPR: 3,
+    INFINITY: 999999999,
 }
 
 const CONSTANT_IMG = {
     FOOT_MAN_WALKING: 'FOOT_MAN_WALKING', // 图片位置
     FOOT_MAN_WALKING_SIZE: '1024_1024', // 图片尺寸
+    GOLD_COIN_IN_MAP: 'GOLD_COIN_IN_MAP',
+    GOLD_COIN_IN_MAP_SIZE: '256_128',
 }
 
 export const getImageFromX_Y = (imgClass, X_Y) => {
@@ -50,6 +53,7 @@ export const footMan = {
     skill: {
         cd: CONSTANT_COMMON.BASE_ONE_SECOND
     },
+    zIndex: 10,
     // 图片渲染的优化方向, 提供一个使用大图的高宽及横纵下标返回图片的能力
     framePerChange: {
         TOP: 5,
@@ -82,12 +86,50 @@ export const footMan = {
 
 
 /**
+ * monster info  {}
+ *      [role, skill]
+ *      role {}
+ *          [name, des, hp, atk, def, magic, spd]
+ *      skill {}
+ *          [cd]
+ */
+export const goldCoinInMap = {
+    role: {
+        name: "金币",
+        des: "财富的象征, 世人匆匆忙忙, 不过图碎银几两~",
+        hp: CONSTANT_COMMON.INFINITY,
+        atk: CONSTANT_COMMON.INFINITY,
+        def: CONSTANT_COMMON.INFINITY,
+        spd: CONSTANT_COMMON.INFINITY,
+    },
+    skill: {
+        cd: CONSTANT_COMMON.BASE_ONE_SECOND
+    },
+    framePerChange: {
+        SPIN: 5,
+    },
+    framesList: {
+        SPIN: [{ imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_1_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_2_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_3_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_4_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_5_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_6_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_7_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_8_8_4' },
+        { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_1_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_2_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_3_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_4_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_5_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_6_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_7_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_8_8_4' }],
+    },
+    zIndex: 9,
+    onMonsterAdd: function () {
+        const [game, self] = arguments
+        // self.curEvent = 'SPIN'
+        console.log("加载了金币, 并执行SPIN行为")
+        console.log(self)
+        this.curEvent = 'SPIN'
+    }
+}
+
+
+/**
  * action info {}
  * 
  */
 export const walking = function (game) {
     const { spd } = this.state;
-    console.log("spd", spd)
+    // console.log("spd", spd)
     let direct = 'DEFAULT'
     let computedKeyList = JSON.parse(JSON.stringify(game.keyCollect))
     if (computedKeyList.includes('J') && computedKeyList.includes('L')) {

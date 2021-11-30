@@ -1,9 +1,10 @@
-import { footMan, walking, getImageFromX_Y, CONSTANT_COMMON } from "./data"
+import { footMan, goldCoinInMap, walking, getImageFromX_Y, CONSTANT_COMMON } from "./data"
 
 class Game {
     monsterList = []
     heroList = []
     keyCollect = []
+    allRenderList = []
     constructor(props) {
 
     }
@@ -14,11 +15,13 @@ class Game {
         this.heroList.forEach(v => v.action && v.action(this))
 
         // 执行render
-        const allRenderList = [].concat(this.monsterList).concat(this.heroList)
         var c = document.getElementById('canvas');
         var ctx = c.getContext("2d");
         ctx.clearRect(0, 0, c.width, c.height)
-        allRenderList.forEach(v => v.render({ ctx }))
+        this.filterRenderListByPositionY()
+        this.allRenderList.forEach(v => {
+            v.render && v.render({ ctx })
+        })
 
         // 执行下一帧
         window.requestAnimationFrame(() => {
@@ -36,14 +39,23 @@ class Game {
 
     addNewMonster(monster) {
         this.monsterList.push(monster)
+        console.log("第一次addNewMonster,", this.monsterList)
         monster.onMonsterAdd && this.onMonsterAdd(monster)
+        this.updateAllRenderList()
+        return this;
     }
 
     addNewHero(hero) {
-        console.log(hero)
         this.heroList.push(hero)
+        console.log("diyici add new hero,", this.heroList)
         hero.onHeroAdd && this.onHeroAdd(hero)
+        this.updateAllRenderList()
         return this;
+    }
+
+    // 更新
+    updateAllRenderList() {
+        this.allRenderList = [].concat(this.monsterList).concat(this.heroList)
     }
 
     keyActiveCollect(handle, key) {
@@ -57,8 +69,24 @@ class Game {
         }
     }
 
+    filterRenderListByPositionY() {
+        this.allRenderList.sort((a, b) => {
+            if (a.curEvent && a.curRender.imgClass && b.curEvent && b.curRender.imgClass) {
+                let aImageInfo = getImageFromX_Y(a.curRender.imgClass, a.curRender.imgLR)
+                let bImageInfo = getImageFromX_Y(b.curRender.imgClass, b.curRender.imgLR)
+                // console.log(aImageInfo.height, bImageInfo.height)
+                return ((aImageInfo.height || 0) + a.position.y - a.position.yRegression) - ((bImageInfo.height || 0) + b.position.y - b.position.yRegression)
+            } else {
+                return false
+            }
+        })
+        console.log(this.allRenderList[0])
+    }
+
     // 钩子
-    onMonsterAdd(monster) { }
+    onMonsterAdd(monster) {
+        monster.onMonsterAdd(this, monster)
+    }
     onHeroAdd(hero) {
         hero.onHeroAdd(this, hero)
     }
@@ -72,6 +100,7 @@ class Role {
     position = {}
     onHeroAdd = null
     curEvent = null // 记录当前执行的事件
+    zIndex = 1 // 渲染的层级
     curRender = {
         imgClass: null,
         imgLR: null,
@@ -93,10 +122,11 @@ class Role {
         this.onMonsterAdd = props.onMonsterAdd || null
         this.framesList = props.framesList || {}
         this.framePerChange = props.framePerChange || {}
+        this.zIndex = props.zIndex || 1
     }
     addPosition(params) {
-        const { x, y, z = 0 } = params;
-        this.position = { x, y, z }
+        const { x, y, z = 0, yRegression = 0 } = params;
+        this.position = { x, y, z, yRegression }
         return this;
     }
     // 渲染逻辑 找到指定的某个图片 某一帧  渲染到canvas里
@@ -122,7 +152,7 @@ class Role {
         const Img = document.getElementsByClassName(this.curRender.imgClass)[0]
         const { x, y } = this.position
         ctx.drawImage(Img, sx, sy, swidth, sheight, x, y, width, height)
-        console.log(this.curRender.imgClass, x, y,)
+        // console.log(this.curRender.imgClass, x, y,)
 
     }
     addAction(eventName, func) {
@@ -133,10 +163,13 @@ class Role {
 
 const footManNew = new Role(footMan)
 const gameNew = new Game()
+const goldCoinInMapNew = new Role(goldCoinInMap)
 
-footManNew.addPosition({ x: 0, y: 0, z: 0 }).addAction('action', walking)
+footManNew.addPosition({ x: 0, y: 0, z: 0, yRegression: 20 }).addAction('action', walking)
+goldCoinInMapNew.addPosition({ x: 100, y: 100, z: 0, yRegression: 5 })
 
-gameNew.addNewHero(footManNew)
+gameNew.addNewHero(footManNew).addNewMonster(goldCoinInMapNew)
+
 
 document.onkeydown = function (e) {    //对整个页面监听  
     var keyNum = window.event ? e.keyCode : e.which;       //获取被按下的键值  
