@@ -16,6 +16,14 @@ const CONSTANT_IMG = {
     GOLD_COIN_IN_MAP_SIZE: '256_128',
 }
 
+const goods = {
+    gold: {
+        id: 1,
+        name: 'gold',
+        description: 'A precious matel.'
+    }
+}
+
 export const getImageFromX_Y = (imgClass, X_Y) => {
     // 1_1_8_8 表示图片是8X8, imgClass找对应图片size, 除以即可 抛出结果, 
     const imgSize = CONSTANT_IMG[imgClass + '_SIZE']
@@ -43,12 +51,25 @@ export const getImageFromX_Y = (imgClass, X_Y) => {
  */
 export const footMan = {
     role: {
+        id: 1,
         name: "福特曼",
         des: "一个普通的脚男,出身卑微,生活困苦",
         hp: CONSTANT_COMMON.BASE_HERO_HP,
         atk: CONSTANT_COMMON.BASE_HERO_ATK,
         def: CONSTANT_COMMON.BASE_HERO_DEF,
-        spd: CONSTANT_COMMON.BASE_HERO_SPD
+        spd: CONSTANT_COMMON.BASE_HERO_SPD,
+        isSolid: true,
+        isHero: true,
+        volumeInfo: {
+            shape: 'rectangle',
+            width: 30,
+            height: 80,
+            solid: true,
+        },
+        knapsack: [{
+            id: 1,
+            number: 0
+        }]
     },
     skill: {
         cd: CONSTANT_COMMON.BASE_ONE_SECOND
@@ -78,9 +99,16 @@ export const footMan = {
     },
     onHeroAdd: function () {
         const [game, self] = arguments
-        console.log("大敌当前,十分恐惧, hp-1")
         self.state.hp--
-        console.log(self)
+    },
+    onCrash: function () {
+        const [self, crashItem] = arguments
+        if (crashItem.state.isSolid) {
+            if (self.curRender.lastFrame) {
+                this.position.x = self.curRender.lastFrame.x1
+                this.position.y = self.curRender.lastFrame.y1
+            }
+        }
     }
 }
 
@@ -96,29 +124,67 @@ export const footMan = {
 export const goldCoinInMap = {
     role: {
         name: "金币",
+        id: 2,
         des: "财富的象征, 世人匆匆忙忙, 不过图碎银几两~",
         hp: CONSTANT_COMMON.INFINITY,
         atk: CONSTANT_COMMON.INFINITY,
         def: CONSTANT_COMMON.INFINITY,
         spd: CONSTANT_COMMON.INFINITY,
+        volumeInfo: {
+            shape: 'circle',
+            r: 10,
+            solid: false,
+            codeDown: 60, // 碰撞cd时间
+            once: true,
+            occur: false
+        }
     },
     skill: {
         cd: CONSTANT_COMMON.BASE_ONE_SECOND
     },
     framePerChange: {
         SPIN: 5,
+        DEAD: 1
     },
     framesList: {
         SPIN: [{ imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_1_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_2_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_3_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_4_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_5_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_6_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_7_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_8_8_4' },
         { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_1_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_2_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_3_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_4_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_5_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_6_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_7_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_8_8_4' }],
+        DEAD: [{ imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_1_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_2_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_3_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_4_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_5_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_6_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_7_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '3_8_8_4' },
+        { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_1_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_2_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_3_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_4_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_5_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_6_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_7_8_4' }, { imgClass: CONSTANT_IMG.GOLD_COIN_IN_MAP, imgLR: '2_8_8_4' }]
     },
     zIndex: 9,
     onMonsterAdd: function () {
         const [game, self] = arguments
         // self.curEvent = 'SPIN'
-        console.log("加载了金币, 并执行SPIN行为")
-        console.log(self)
+        console.log("load gold coin, 并执行SPIN行为")
         this.curEvent = 'SPIN'
+    },
+    onCrash: function () {
+        const [self, crashItem, game] = arguments
+        if (crashItem.state.isHero) {
+            if (self.state.volumeInfo.occur) return
+            this.initFrameInfo('DEAD')
+            self.state.volumeInfo.occur = true
+            self.nextFrameEndEvent = (self.nextFrameEndEvent || []).concat(this.onDead.bind(self, crashItem, game))
+            crashItem.KnapsackGetSth(1, 1)
+            let _p = document.createElement('p')
+            _p.innerHTML = `${crashItem.state.name}获得了${1}枚${self.state.name}`
+            document.getElementById('log-area').appendChild(_p)
+
+            setTimeout(() => {
+                [0, 1, 3].forEach(item => {
+                    let newCoin = new window.__Role(window.__monsterList[self.state.id])
+                    newCoin.state.volumeInfo.occur = false
+                    newCoin.state.volumeInfo.occur = false
+                    newCoin.addPosition({ x: Math.floor(Math.random() * 1000), y: Math.floor(Math.random() * 400), z: 0, yRegression: 5 })
+                    window.__game.addNewMonster(newCoin)
+                })
+            }, 500)
+        }
+    },
+    onDead: function () {
+        const [crashItem, game] = arguments
+        this.delete = true
     }
 }
 
@@ -129,6 +195,7 @@ export const goldCoinInMap = {
  */
 export const walking = function (game) {
     const { spd } = this.state;
+    this.oldPosition = JSON.parse(JSON.stringify(this.position)) // 缓存本步骤
     // console.log("spd", spd)
     let direct = 'DEFAULT'
     let computedKeyList = JSON.parse(JSON.stringify(game.keyCollect))
