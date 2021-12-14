@@ -4,6 +4,7 @@ class Game {
     monsterList = []
     heroList = []
     keyCollect = []
+    keyCollectBuffer = []
     allRenderList = []
     currentRoleId = 0
     constructor(props) {
@@ -99,6 +100,24 @@ class Game {
             if (this.keyCollect.includes(key)) {
                 let index = this.keyCollect.indexOf(key)
                 this.keyCollect.splice(index, 1)
+                // 松开的键要放入缓冲区, 来判定连续点击
+                if (!this.keyCollect.includes(key)) {
+                    this.keyCollectBuffer.push(key)
+                }
+                const removeBufferKey = () => {
+                    setTimeout(() => {
+                        let index = this.keyCollectBuffer.indexOf(key)
+                        if (index > -1) {
+                            if (!this.keyCollect.includes(key)) {
+                                // key 未激活则移出缓冲区
+                                this.keyCollectBuffer.splice(index, 1)
+                            } else {
+                                removeBufferKey()
+                            }
+                        }
+                    }, 500);
+                }
+                removeBufferKey()
             }
         }
     }

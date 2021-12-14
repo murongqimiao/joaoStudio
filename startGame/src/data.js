@@ -14,6 +14,8 @@ const CONSTANT_IMG = {
     FOOT_MAN_WALKING_SIZE: '1024_1024', // 图片尺寸
     GOLD_COIN_IN_MAP: 'GOLD_COIN_IN_MAP',
     GOLD_COIN_IN_MAP_SIZE: '256_128',
+    FOOT_MAN_RUN: 'FOOT_MAN_RUN',
+    FOOT_MAN_RUN_SIZE: '1024_1024',
 }
 
 const goods = {
@@ -84,7 +86,15 @@ export const footMan = {
         RIGHT: 5,
         BOTTOM: 5,
         BOTTOM_LEFT: 5,
-        BOTTOM_RIGHT: 5
+        BOTTOM_RIGHT: 5,
+        TOP_RUN: 5,
+        TOP_LEFT_RUN: 5,
+        TOP_RIGHT_RUN: 5,
+        LEFT_RUN: 5,
+        RIGHT_RUN: 5,
+        BOTTOM_RUN: 5,
+        BOTTOM_LEFT_RUN: 5,
+        BOTTOM_RIGHT_RUN: 5
     },
     framesList: {
         TOP: [{ imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '3_1_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '3_2_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '3_3_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '3_4_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '3_5_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '3_6_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '3_7_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '3_8_8_8' }],
@@ -95,6 +105,14 @@ export const footMan = {
         BOTTOM: [{ imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '7_1_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '7_2_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '7_3_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '7_4_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '7_5_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '7_6_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '7_7_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '7_8_8_8' }],
         BOTTOM_LEFT: [{ imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '8_1_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '8_2_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '8_3_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '8_4_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '8_5_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '8_6_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '8_7_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '8_8_8_8' }],
         BOTTOM_RIGHT: [{ imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '6_1_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '6_2_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '6_3_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '6_4_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '6_5_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '6_6_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '6_7_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '6_8_8_8' }],
+        TOP_RUN: [{ imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '3_1_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '3_2_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '3_3_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '3_4_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '3_5_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '3_6_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '3_7_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '3_8_8_8' }],
+        TOP_LEFT_RUN: [{ imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '2_1_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '2_2_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '2_3_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '2_4_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '2_5_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '2_6_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '2_7_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '2_8_8_8' }],
+        TOP_RIGHT_RUN: [{ imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '4_1_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '4_2_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '4_3_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '4_4_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '4_5_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '4_6_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '4_7_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '4_8_8_8' }],
+        LEFT_RUN: [{ imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '1_1_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '1_2_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '1_3_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '1_4_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '1_5_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '1_6_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '1_7_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '1_8_8_8' }],
+        RIGHT_RUN: [{ imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '5_1_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '5_2_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '5_3_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '5_4_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '5_5_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '5_6_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '5_7_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '5_8_8_8' }],
+        BOTTOM_RUN: [{ imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '7_1_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '7_2_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '7_3_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '7_4_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '7_5_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '7_6_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '7_7_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '7_8_8_8' }],
+        BOTTOM_LEFT_RUN: [{ imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '8_1_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '8_2_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '8_3_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '8_4_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '8_5_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '8_6_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '8_7_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '8_8_8_8' }],
+        BOTTOM_RIGHT_RUN: [{ imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '6_1_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '6_2_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '6_3_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '6_4_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '6_5_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '6_6_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '6_7_8_8' }, { imgClass: CONSTANT_IMG.FOOT_MAN_RUN, imgLR: '6_8_8_8' }],
         DEFAULT: [{ imgClass: CONSTANT_IMG.FOOT_MAN_WALKING, imgLR: '7_1_8_8' }]
     },
     onHeroAdd: function () {
@@ -199,6 +217,7 @@ export const walking = function (game) {
     // console.log("spd", spd)
     let direct = 'DEFAULT'
     let computedKeyList = JSON.parse(JSON.stringify(game.keyCollect))
+    let computedKeyListBuffer = JSON.parse(JSON.stringify(game.keyCollectBuffer))
     if (computedKeyList.includes('J') && computedKeyList.includes('L')) {
         // 只考虑IK方向
         ['J', 'L'].forEach(key => computedKeyList.splice(computedKeyList.indexOf(key)))
@@ -210,22 +229,25 @@ export const walking = function (game) {
         const check = (list) => {
             return list.map(v => computedKeyList.includes(v)).every(v => v)
         }
+        const hasInBuffer = (list) => {
+            return list.map(v => computedKeyListBuffer.includes(v)).some(v => v)
+        }
         if (check(['J', 'I'])) {
-            direct = 'TOP_LEFT'
+            direct = 'TOP_LEFT' + (hasInBuffer(['J', 'I']) ? '_RUN' : '')
         } else if (check(['I', 'L'])) {
-            direct = 'TOP_RIGHT'
+            direct = 'TOP_RIGHT' + (hasInBuffer(['I', 'L']) ? '_RUN' : '')
         } else if (check(['J', 'K'])) {
-            direct = 'BOTTOM_LEFT'
+            direct = 'BOTTOM_LEFT' + (hasInBuffer(['J', 'K']) ? '_RUN' : '')
         } else if (check(['K', 'L'])) {
-            direct = 'BOTTOM_RIGHT'
+            direct = 'BOTTOM_RIGHT' + (hasInBuffer(['K', 'L']) ? '_RUN' : '')
         } else if (check(['I'])) {
-            direct = 'TOP'
+            direct = 'TOP' + (hasInBuffer(['I']) ? '_RUN' : '')
         } else if (check(['J'])) {
-            direct = 'LEFT'
+            direct = 'LEFT' + (hasInBuffer(['J']) ? '_RUN' : '')
         } else if (check(['K'])) {
-            direct = 'BOTTOM'
+            direct = 'BOTTOM' + (hasInBuffer(['K']) ? '_RUN' : '')
         } else if (check(['L'])) {
-            direct = 'RIGHT'
+            direct = 'RIGHT' + (hasInBuffer(['L']) ? '_RUN' : '')
         }
     }
     if (direct !== this.curEvent) {
@@ -256,6 +278,27 @@ export const walking = function (game) {
             this.position.y += spd
             break
         case 'BOTTOM_RIGHT': this.position.x += spd
+            this.position.y += spd
+            break
+        case 'TOP_RUN': this.position.y -= spd;
+            break
+        case 'TOP_RIGHT_RUN': this.position.x += spd
+            this.position.y -= spd
+            break
+        case 'TOP_LEFT_RUN':
+            this.position.x -= spd
+            this.position.y -= spd
+            break
+        case 'RIGHT_RUN': this.position.x += spd
+            break
+        case 'BOTTOM_RUN': this.position.y += spd
+            break
+        case 'LEFT_RUN': this.position.x -= spd
+            break
+        case 'BOTTOM_LEFT_RUN': this.position.x -= spd
+            this.position.y += spd
+            break
+        case 'BOTTOM_RIGHT_RUN': this.position.x += spd
             this.position.y += spd
             break
         default: this.curEvent = 'DEFAULT'
