@@ -3,7 +3,7 @@ export const CONSTANT_COMMON = {
     BASE_HERO_ATK: 1,
     BASE_HERO_DEF: 0,
     BASE_HERO_MAGIC: 3,
-    BASE_HERO_SPD: 4,
+    BASE_HERO_SPD: 2,
     BASE_ONE_SECOND: 60,
     DPR: 3,
     INFINITY: 999999999,
@@ -16,6 +16,8 @@ const CONSTANT_IMG = {
     GOLD_COIN_IN_MAP_SIZE: '256_128',
     FOOT_MAN_RUN: 'FOOT_MAN_RUN',
     FOOT_MAN_RUN_SIZE: '1024_1024',
+    MONSTER_01_WALK: 'MONSTER_01_WALK',
+    MONSTER_01_WALK_SIZE: '1024_1024',
 }
 
 const goods = {
@@ -206,6 +208,75 @@ export const goldCoinInMap = {
     }
 }
 
+/**
+ * 
+ * @param {*} game 
+ * @returns 
+ */
+ export const Monster01 = {
+    role: {
+        id: 3,
+        name: "Monster",
+        des: "一个普通的Monster,理论上应该是史莱姆或者是别的什么,但是作者第一眼就看到了他",
+        hp: CONSTANT_COMMON.BASE_HERO_HP,
+        atk: CONSTANT_COMMON.BASE_HERO_ATK,
+        def: CONSTANT_COMMON.BASE_HERO_DEF,
+        spd: CONSTANT_COMMON.BASE_HERO_SPD,
+        isSolid: true,
+        isHero: true,
+        volumeInfo: {
+            width: 80,
+            height: 80,
+            shape: 'rectangle',
+            r: 40,
+            solid: true,
+        },
+    },
+    skill: {
+        cd: CONSTANT_COMMON.BASE_ONE_SECOND
+    },
+    zIndex: 10,
+    // 图片渲染的优化方向, 提供一个使用大图的高宽及横纵下标返回图片的能力
+    framePerChange: {
+        TOP: 5,
+        TOP_LEFT: 5,
+        TOP_RIGHT: 5,
+        LEFT: 5,
+        RIGHT: 5,
+        BOTTOM: 5,
+        BOTTOM_LEFT: 5,
+        BOTTOM_RIGHT: 5,
+        TOP_RUN: 5,
+        TOP_LEFT_RUN: 5,
+        TOP_RIGHT_RUN: 5,
+        LEFT_RUN: 5,
+        RIGHT_RUN: 5,
+        BOTTOM_RUN: 5,
+        BOTTOM_LEFT_RUN: 5,
+        BOTTOM_RIGHT_RUN: 5
+    },
+    framesList: {
+        TOP: [{ imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '3_1_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '3_2_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '3_3_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '3_4_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '3_5_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '3_6_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '3_7_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '3_8_8_8' }],
+        TOP_LEFT: [{ imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '2_1_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '2_2_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '2_3_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '2_4_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '2_5_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '2_6_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '2_7_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '2_8_8_8' }],
+        TOP_RIGHT: [{ imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '4_1_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '4_2_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '4_3_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '4_4_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '4_5_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '4_6_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '4_7_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '4_8_8_8' }],
+        LEFT: [{ imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '1_1_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '1_2_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '1_3_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '1_4_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '1_5_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '1_6_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '1_7_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '1_8_8_8' }],
+        RIGHT: [{ imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '5_1_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '5_2_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '5_3_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '5_4_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '5_5_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '5_6_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '5_7_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '5_8_8_8' }],
+        BOTTOM: [{ imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '7_1_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '7_2_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '7_3_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '7_4_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '7_5_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '7_6_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '7_7_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '7_8_8_8' }],
+        BOTTOM_LEFT: [{ imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '8_1_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '8_2_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '8_3_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '8_4_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '8_5_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '8_6_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '8_7_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '8_8_8_8' }],
+        BOTTOM_RIGHT: [{ imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '6_1_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '6_2_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '6_3_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '6_4_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '6_5_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '6_6_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '6_7_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '6_8_8_8' }],
+        DEFAULT: [{ imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '7_1_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '7_2_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '7_3_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '7_4_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '7_5_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '7_6_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '7_7_8_8' }, { imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '7_8_8_8' }],
+        // DEFAULT: [{ imgClass: CONSTANT_IMG.MONSTER_01_WALK, imgLR: '7_1_8_8' }]
+    },
+    onMonsterAdd: function () {
+        const [game, self] = arguments
+        this.curEvent = 'BOTTOM'
+    },
+    onCrash: function () {
+        const [self, crashItem] = arguments
+       
+    }
+}
+
 
 /**
  * action info {}
@@ -280,26 +351,26 @@ export const walking = function (game) {
         case 'BOTTOM_RIGHT': this.position.x += spd
             this.position.y += spd
             break
-        case 'TOP_RUN': this.position.y -= spd;
+        case 'TOP_RUN': this.position.y -= (spd * 2);
             break
-        case 'TOP_RIGHT_RUN': this.position.x += spd
-            this.position.y -= spd
+        case 'TOP_RIGHT_RUN': this.position.x += (spd * 2);
+            this.position.y -= (spd * 2);
             break
         case 'TOP_LEFT_RUN':
-            this.position.x -= spd
-            this.position.y -= spd
+            this.position.x -= (spd * 2);
+            this.position.y -= (spd * 2);
             break
-        case 'RIGHT_RUN': this.position.x += spd
+        case 'RIGHT_RUN': this.position.x += (spd * 2);
             break
-        case 'BOTTOM_RUN': this.position.y += spd
+        case 'BOTTOM_RUN': this.position.y += (spd * 2);
             break
-        case 'LEFT_RUN': this.position.x -= spd
+        case 'LEFT_RUN': this.position.x -= (spd * 2);
             break
-        case 'BOTTOM_LEFT_RUN': this.position.x -= spd
-            this.position.y += spd
+        case 'BOTTOM_LEFT_RUN': this.position.x -= (spd * 2);
+            this.position.y += (spd * 2);
             break
-        case 'BOTTOM_RIGHT_RUN': this.position.x += spd
-            this.position.y += spd
+        case 'BOTTOM_RIGHT_RUN': this.position.x += (spd * 2);
+            this.position.y += (spd * 2);
             break
         default: this.curEvent = 'DEFAULT'
     }

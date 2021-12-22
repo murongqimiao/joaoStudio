@@ -8,6 +8,20 @@
     <title>test</title>
     <script src="./index.js"></script>
     <style>
+        #canvas {
+            margin-bottom: 200px;
+            background-image: linear-gradient(0deg,transparent 24%,hsla(0,0%,100%,.05) 25%,hsla(0,0%,100%,.05) 26%,transparent 27%,transparent 74%,hsla(0,0%,100%,.05) 75%,hsla(0,0%,100%,.05) 76%,transparent 77%,transparent),linear-gradient(90deg,transparent 24%,hsla(0,0%,100%,.05) 25%,hsla(0,0%,100%,.05) 26%,transparent 27%,transparent 74%,hsla(0,0%,100%,.05) 75%,hsla(0,0%,100%,.05) 76%,transparent 77%,transparent);
+            background-size: 50px 50px;
+            background-color: #3c3c3c!important;
+        }
+        #load-status {
+            position: fixed;
+            text-align: center;
+            top: 45vh;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+        }
     </style>
 </head>
 
@@ -18,6 +32,8 @@
     <img class="FOOT_MAN_RUN" src="./assets/role/footManRun.png" alt="">
     <img class="GOLD_COIN_IN_MAP" src="./assets/role/goldCoin.png" alt="">
     <div style="background: url('./assets/role/footMan.png')"></div>
+    <img class="MONSTER_01_WALK" src="./assets/monster/Monster01_walk.png" alt="">
+    <div id="load-status"></div>
 </body>
 <script>
 

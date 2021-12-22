@@ -1,5 +1,7 @@
-import { footMan, goldCoinInMap, walking, getImageFromX_Y, CONSTANT_COMMON } from "./data"
+import { footMan, Monster01, goldCoinInMap, walking, getImageFromX_Y, CONSTANT_COMMON } from "./data"
 import { collisionDetection } from "./utils/collisionDetection"
+import { startPollingImgStatus } from "./utils/checkResourceLoad"
+
 class Game {
     monsterList = []
     heroList = []
@@ -123,6 +125,7 @@ class Game {
     }
 
     filterRenderListByPositionY() {
+        // 根据y坐标调整角色渲染层级
         this.allRenderList.sort((a, b) => {
             if (a.curEvent && a.curRender.imgClass && b.curEvent && b.curRender.imgClass) {
                 let aImageInfo = getImageFromX_Y(a.curRender.imgClass, a.curRender.imgLR)
@@ -253,18 +256,22 @@ class Role {
 const footManNew = new Role(footMan)
 const gameNew = new Game()
 const goldCoinInMapNew = new Role(goldCoinInMap)
+const Monster01New = new Role(Monster01)
 window.__heroList = {
     [footManNew.state.id]: footMan
 }
 window.__monsterList = {
-    [goldCoinInMapNew.state.id]: goldCoinInMap
+    [goldCoinInMapNew.state.id]: goldCoinInMap,
+    [Monster01New.state.id]: Monster01
 }
 window.__game = gameNew
 window.__Role = Role
 
-footManNew.addPosition({ x: 0, y: 0, z: 0, yRegression: 20 }).addAction('action', walking)
+footManNew.addPosition({ x: 300, y: 300, z: 0, yRegression: 20 }).addAction('action', walking)
 goldCoinInMapNew.addPosition({ x: 100, y: 100, z: 0, yRegression: 5 })
-window.__game.addNewHero(footManNew).addNewMonster(goldCoinInMapNew)
+Monster01New.addPosition({ x: 200, y: 200, z: 0, yRegression: 5 })
+
+window.__game.addNewHero(footManNew).addNewMonster(goldCoinInMapNew).addNewMonster(Monster01New)
 
 
 
@@ -312,10 +319,13 @@ document.onkeypress = (e) => {
 }
 
 
-
-setTimeout(() => {
+/**
+ * 判断图片资源加载状态
+ */
+const that = this;
+startPollingImgStatus(() => {
     gameNew.start()
-}, 1000)
+})
 
 
 
