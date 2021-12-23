@@ -37,6 +37,26 @@ export const collisionDetection = (objectA, objectB) => {
     }
 }
 
+/**
+ * 获取角色体积边界,用来debug描边
+ * @param {*} bulk 
+ * @returns 
+ */
+export const getBulkBorder = (bulk) => {
+    if (bulk.state.volumeInfo.shape === 'circle') {
+        const { x1, y1, x3, y3 } = bulk.curRender.lastFrame
+        // case circle return x1,y1 r
+        return [(x1 / 2 + x3 / 2), (y1 / 2 + y3 / 2), bulk.state.volumeInfo.r]
+    } else if ((bulk.state.volumeInfo.shape === 'rectangle')) {
+        const { x1, y1, x2, y2, x3, y3, x4, y4 } = bulk.curRender.lastFrame
+        const { width, height } = bulk.state.volumeInfo
+        const dx = (x3 - x1 - width) / 2
+        const dy = (y3 - y1 - height) / 2
+        // case rectangle return x1,y1, x2,y2 x3,y3, x4,y4
+        return [x1 + dx, y1 + dy, x2 + dx, y2 - dy, x3 - dx, y3 - dy, x4 - dx, y4 + dy]
+    }
+}
+
 const rectanglesCollisionDetection = ([Ax1, Ay1, Ax2, Ay2, Ax3, Ay3, Ax4, Ay4], [Bx1, By1, Bx2, By2, Bx3, By3, Bx4, By4]) => {
     let result = true
     let centerA = { x: 0, y: 0 }

@@ -1,6 +1,7 @@
 import { footMan, Monster01, goldCoinInMap, walking, getImageFromX_Y, CONSTANT_COMMON } from "./data"
-import { collisionDetection } from "./utils/collisionDetection"
+import { collisionDetection, getBulkBorder } from "./utils/collisionDetection"
 import { startPollingImgStatus } from "./utils/checkResourceLoad"
+import { drawDot, drawPolygon } from "./utils/canvasTool"
 
 class Game {
     monsterList = []
@@ -9,6 +10,7 @@ class Game {
     keyCollectBuffer = []
     allRenderList = []
     currentRoleId = 0
+    debug = 1
     constructor(props) {
 
     }
@@ -37,7 +39,7 @@ class Game {
         ctx.clearRect(0, 0, c.width, c.height)
         this.filterRenderListByPositionY()
         this.allRenderList.forEach(v => {
-            v.render && v.render({ ctx })
+            v.render && v.render({ ctx, debug: this.debug })
         })
 
         // 执行下一帧
@@ -201,7 +203,7 @@ class Role {
     }
     // 渲染逻辑 找到指定的某个图片 某一帧  渲染到canvas里
     render() {
-        const { ctx } = arguments[0]
+        const { ctx, debug } = arguments[0]
         if (this.curEvent && this.framesList[this.curEvent]) {
             // 命中当前行为 进行渲染
             if (this.curRender.curFrame === this.framePerChange[this.curEvent]) { // 动画行进到下一张
@@ -236,6 +238,20 @@ class Role {
         }
         ctx.drawImage(Img, sx, sy, swidth, sheight, x, y, width, height)
         // console.log(this.curRender.imgClass, x, y,)
+        if (debug) {
+            // 体积描边
+            // console.log("========start debug 描边==========")
+            const borderData = getBulkBorder(this);
+            switch (this.state.volumeInfo.shape) {
+                case 'rectangle':
+                    drawPolygon({ ctx }, borderData);
+                    break;
+                case 'circle':
+                    drawDot({ ctx }, borderData)
+                    break;
+                default: () => {}
+            }
+        }
         return this
     }
     addAction(eventName, func) {
