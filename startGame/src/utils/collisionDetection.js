@@ -12,27 +12,15 @@
 
 export const collisionDetection = (objectA, objectB) => {
     const type = objectA.state.volumeInfo.shape + '_' + objectB.state.volumeInfo.shape
-    const checkShape = (item) => {
-        if (item.state.volumeInfo.shape === 'circle') {
-            const { x1, y1, x3, y3 } = item.curRender.lastFrame
-            return [(x1 / 2 + x3 / 2), (y1 / 2 + y3 / 2), item.state.volumeInfo.r]
-        } else if ((item.state.volumeInfo.shape === 'rectangle')) {
-            const { x1, y1, x2, y2, x3, y3, x4, y4 } = item.curRender.lastFrame
-            const { width, height } = item.state.volumeInfo
-            const dx = (x3 - x1 - width) / 2
-            const dy = (y3 - y1 - height) / 2
-            return [x1 + dx, y1 + dy, x2 + dx, y2 - dy, x3 - dx, y3 - dy, x4 - dx, y4 + dy]
-        }
-    }
     switch (type) {
         case 'rectangle_rectangle':
-            return rectanglesCollisionDetection(checkShape(objectA), checkShape(objectB));
+            return rectanglesCollisionDetection(getBulkBorder(objectA), getBulkBorder(objectB));
         case 'rectangle_circle':
-            return rectangleCircleCollisionDetection(checkShape(objectA), checkShape(objectB));
+            return rectangleCircleCollisionDetection(getBulkBorder(objectA), getBulkBorder(objectB));
         case 'circle_rectangle':
-            return rectangleCircleCollisionDetection(checkShape(objectB), checkShape(objectA))
+            return rectangleCircleCollisionDetection(getBulkBorder(objectB), getBulkBorder(objectA))
         case 'circle_circle':
-            return circlesCollisionDetection(checkShape(objectA), checkShape(objectB))
+            return circlesCollisionDetection(getBulkBorder(objectA), getBulkBorder(objectB))
         default: () => false
     }
 }
@@ -88,46 +76,55 @@ const rectangleCircleCollisionDetection = ([Ax1, Ay1, Ax2, Ay2, Ax3, Ay3, Ax4, A
 
     if (Bx1 < Ax1 && By1 < Ay1) { // left top
         // console.log('left top')
-        if (computedDistance(Bx1, By1, Ax1, Ay1) < r) {
+        if (computedDistance(Bx1, By1, Ax1, Ay1) <= r) {
+            // console.log("========left top crash =========")
             result = true
         }
     } else if (Bx1 < Ax1 && By1 > Ay1 && By1 < Ay2) { // left center
         // console.log(' left center')
-        if ((centerA.x - Bx1) < (r + (widthA / 2))) {
+        if ((centerA.x - Bx1) <= (r + (widthA / 2))) {
+            // console.log("==========left center crash=========")
             result = true
         }
     } else if (Bx1 < Ax1 && By1 > Ay2) { // left bottom
         // console.log('left bottom')
-        if (computedDistance(Bx1, By1, Ax2, Ay2) < r) {
+        if (computedDistance(Bx1, By1, Ax2, Ay2) <= r) {
+            // console.log("=========left bottom crash =========")
             result = true
         }
     } else if (Bx1 > Ax1 && Bx1 < Ax3 && By1 > Ay2) { // center bottom
         // console.log('center bottom')
-        if ((By1 - centerA.y) < (r + (heightA) / 2)) {
+        if ((By1 - centerA.y) <= (r + (heightA) / 2)) {
+            // console.log("==========center  bottom crash======")
             result = true
         }
     } else if (Bx1 > Ax3 && By1 > Ay3) { // bottom right
         // console.log(' bottom right', computedDistance(Bx1, By1, Ax3, Ay3) < r)
-        if (computedDistance(Bx1, By1, Ax3, Ay3) < r) {
+        if (computedDistance(Bx1, By1, Ax3, Ay3) <= r) {
+            // console.log("===========bottom right crash===========")
             result = true
         }
     } else if (Bx1 > Ax4 && By1 > Ay4 && By1 < Ay3) { // right
         // console.log('right', ((Bx1 - centerA.x) < (r + (widthA) / 2)))
-        if ((Bx1 - centerA.x) < (r + (widthA) / 2)) {
+        if ((Bx1 - centerA.x) <= (r + (widthA) / 2)) {
+            // console.log("==============right crash=========")
             result = true
         }
     } else if (Bx1 > Ax4 && By1 < Ay4) { // right top
         // console.log('right top')
-        if (computedDistance(Bx1, By1, Ax4, Ay4) < r) {
+        if (computedDistance(Bx1, By1, Ax4, Ay4) <= r) {
+            // console.log("=======right top crash========")
+            // console.log(Bx1, By1, Ax4, Ay4)
             result = true
         }
     } else if (Bx1 > Ax1 && Bx1 < Ax3 && By1 < Ay4) { // top
         // console.log('top')
-        if ((centerA.y - By1) < (r + (heightA) / 2)) {
+        if ((centerA.y - By1) <= (r + (heightA / 2))) {
+            // console.log("=========top crash===========")
             result = true
         }
     } else {
-        result = true // circle origin in center
+        // result = true // circle origin in center
     }
     return result
 }
