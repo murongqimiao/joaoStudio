@@ -6,6 +6,7 @@ import { drawDot, drawPolygon } from "./utils/canvasTool"
 class Game {
     monsterList = []
     heroList = []
+    environmentList = [] // 环境资源
     keyCollect = []
     keyCollectBuffer = []
     allRenderList = []
@@ -19,15 +20,25 @@ class Game {
         // 执行行为
         let needUpdate = false
         this.allRenderList.forEach((v, index) => {
-            if (v.delete) { needUpdate = true }
             v.action && v.action(this)
-            this.allRenderList.forEach((item, itemIndex) => {
-                // computed collision
-                if (index < itemIndex && v.curRender.lastFrame && item.curRender.lastFrame && collisionDetection(v, item)) { // 只计算一遍
-                    v.onCrash && v.onCrash(v, item, this)
-                    item.onCrash && item.onCrash(item, v, this)
-                }
-            })
+            if (v.oldPosition && v.oldPosition.length) { // 移动过的元素才需要进行碰撞检测
+                this.allRenderList.forEach((item, itemIndex) => {
+                    // computed collision
+                    if (v.currentId !== item.currentId && v.curRender.lastFrame && item.curRender.lastFrame && collisionDetection(v, item)) {
+                        v.onCrash && v.onCrash(v, item, this)
+                        item.onCrash && item.onCrash(item, v, this)
+                        // crash and get back old position
+                        console.log("==============on crash============")
+                        console.log(v)
+                        v.position = v.oldPosition.shift()
+                        v.oldPosition = []
+                    }
+                })
+            }
+            if (v.oldPosition && v.oldPosition.length > 10) {
+                v.oldPosition = v.oldPosition.slice(-10)
+            }
+            if (v.delete) { needUpdate = true }
         })
         if (needUpdate) {
             this.updateAllRenderList()
@@ -94,7 +105,7 @@ class Game {
 
     // 更新
     updateAllRenderList() {
-        this.allRenderList = [].concat(this.monsterList).concat(this.heroList).filter(v => !v.delete)
+        this.allRenderList = [].concat(this.monsterList).concat(this.heroList).concat(this.environmentList).filter(v => !v.delete)
     }
 
     keyActiveCollect(handle, key) {
@@ -133,7 +144,7 @@ class Game {
                 let aImageInfo = getImageFromX_Y(a.curRender.imgClass, a.curRender.imgLR)
                 let bImageInfo = getImageFromX_Y(b.curRender.imgClass, b.curRender.imgLR)
                 // console.log(aImageInfo.height, bImageInfo.height)
-                return ((aImageInfo.height || 0) + a.position.y - a.position.yRegression) - ((bImageInfo.height || 0) + b.position.y - b.position.yRegression)
+                return ((aImageInfo.height || 0) + a.position.y) - ((bImageInfo.height || 0) + b.position.y)
             } else {
                 return false
             }
@@ -155,6 +166,25 @@ class Game {
     }
     onMonsterMoveEnd(monster) { }
     onHeroMoveEnd(hero) { }
+
+    // 检测某个元素是否
+    checkCrashByCurrentId(currentId) {
+        let hasCrash = false
+        this.allRenderList.forEach((v, index) => {
+            if (v.currentId === currentId) {
+                this.allRenderList.forEach((item, itemIndex) => {
+                    // computed collision
+                    if (v.currentId !== item.currentId && item.state.volumeInfo.solid && collisionDetection(v, item)) {
+                        v.onCrash && v.onCrash(v, item, this)
+                        item.onCrash && item.onCrash(item, v, this)
+                        hasCrash = true
+                        // crash and get back old position
+                    }
+                })
+            }
+        })
+        return hasCrash;
+    }
 }
 
 class Role {
@@ -189,10 +219,23 @@ class Role {
         this.framePerChange = props.framePerChange || {}
         this.zIndex = props.zIndex || 1
     }
-    addPosition(params) {
+    addPosition(params, oldPosition) {
         const { x, y, z = 0, yRegression = 0 } = params;
-        this.position = { x, y, z, yRegression }
+        if (!this.position.x) {
+            // 首次添加, 不需要记录oldposition
+            this.position = { x, y, z, yRegression }
+        } else {
+            // 动态更新时候需要检测碰撞
+            if (window.__game.checkCrashByCurrentId(this.currentId)) {
+                console.log("========oldPosition========")
+                console.log(oldPosition)
+                console.log("碰撞了")
+                console.log(this.position)
+                this.position = oldPosition
+            }
+        }
         return this;
+
     }
     initFrameInfo(curEvent) {
         this.curRender.curFrame = 0
@@ -209,7 +252,6 @@ class Role {
             if (this.curRender.curFrame === this.framePerChange[this.curEvent]) { // 动画行进到下一张
                 if (this.curRender.curFrameImgIndex === this.framesList[this.curEvent].length - 1) { // 重复动画归0
                     // 钩子 执行完动画后, 判断帧动画结束时间是否存在
-                    console.log("this.nextFrameEndEvent", this.nextFrameEndEvent)
                     this.nextFrameEndEvent && this.nextFrameEndEvent.length && this.nextFrameEndEvent.shift()() // 帧动画结束事件
                     this.curRender.curFrameImgIndex = 0
                     this.curRender.curFrame = 0
@@ -249,7 +291,7 @@ class Role {
                 case 'circle':
                     drawDot({ ctx }, borderData)
                     break;
-                default: () => {}
+                default: () => { }
             }
         }
         return this
@@ -284,11 +326,11 @@ window.__game = gameNew
 window.__Role = Role
 
 footManNew.addPosition({ x: 300, y: 300, z: 0, yRegression: 20 }).addAction('action', walking)
-goldCoinInMapNew.addPosition({ x: 100, y: 100, z: 0, yRegression: 5 })
-Monster01New.addPosition({ x: 200, y: 200, z: 0, yRegression: 5 })
+goldCoinInMapNew.addPosition({ x: 300, y: 100, z: 0, yRegression: 5 })
+Monster01New.addPosition({ x: 100, y: 200, z: 0, yRegression: 5 })
 
 window.__game.addNewHero(footManNew).addNewMonster(goldCoinInMapNew).addNewMonster(Monster01New)
-
+// window.__game.addNewHero(footManNew).addNewMonster(Monster01New)
 
 
 
@@ -296,15 +338,19 @@ window.__game.addNewHero(footManNew).addNewMonster(goldCoinInMapNew).addNewMonst
 document.onkeydown = function (e) {    //对整个页面监听  
     var keyNum = window.event ? e.keyCode : e.which;       //获取被按下的键值  
     switch (keyNum) {
+        case 37:
         case 74: // J
             gameNew.keyActiveCollect('add', 'J')
             break;
+        case 40:
         case 75: // K
             gameNew.keyActiveCollect('add', 'K')
             break;
+        case 39:
         case 76: // L
             gameNew.keyActiveCollect('add', 'L')
             break
+        case 38:
         case 73: // I
             gameNew.keyActiveCollect('add', 'I')
             break
@@ -314,15 +360,19 @@ document.onkeydown = function (e) {    //对整个页面监听
 document.onkeyup = (e) => { // 监听键盘抬起 停止对应行为
     var keyNum = window.event ? e.keyCode : e.which;
     switch (keyNum) {
+        case 37:
         case 74: // J
             gameNew.keyActiveCollect('remove', 'J')
             break;
+        case 40:
         case 75: // K
             gameNew.keyActiveCollect('remove', 'K')
             break;
+        case 39:
         case 76: // L
             gameNew.keyActiveCollect('remove', 'L')
             break
+        case 38:
         case 73: // I
             gameNew.keyActiveCollect('remove', 'I')
             break

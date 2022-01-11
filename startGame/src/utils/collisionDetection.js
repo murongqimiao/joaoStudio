@@ -36,7 +36,13 @@ export const getBulkBorder = (bulk) => {
         // case circle return x1,y1 r
         return [(x1 / 2 + x3 / 2), (y1 / 2 + y3 / 2), bulk.state.volumeInfo.r]
     } else if ((bulk.state.volumeInfo.shape === 'rectangle')) {
-        const { x1, y1, x2, y2, x3, y3, x4, y4 } = bulk.curRender.lastFrame
+        let { x1, y1, x2, y2, x3, y3, x4, y4 } = bulk.curRender.lastFrame
+        if (bulk && bulk.position && bulk.position.yRegression) {
+            y1 += bulk.position.yRegression
+            y2 += bulk.position.yRegression
+            y3 += bulk.position.yRegression
+            y4 += bulk.position.yRegression
+        }
         const { width, height } = bulk.state.volumeInfo
         const dx = (x3 - x1 - width) / 2
         const dy = (y3 - y1 - height) / 2

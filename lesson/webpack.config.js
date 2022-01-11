@@ -1,6 +1,6 @@
 const path = require('path')
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const curLesson = 'lesson-01'
+const curLesson = 'lesson-04'
 
 module.exports = {
     mode: 'development',
