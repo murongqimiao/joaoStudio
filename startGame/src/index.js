@@ -323,6 +323,19 @@ class Role {
     }
 }
 
+/**
+ * 向项目中添加本地图片资源
+ */
+ console.log("============require.context")
+ let files = require.context("./assets", true, /\.png/)
+ let filesPaths = files.keys()
+ filesPaths.forEach(v => {
+     let _img = document.createElement('img')
+     _img.src = "./assets/" + v
+     document.body && document.body.appendChild(_img)
+     window.resources = Object.assign({}, (window.resources || {}), { [`${v.replaceAll('png', '').replaceAll('.', '').replaceAll('/', '_')}`]: _img })
+ })
+
 const footManNew = new Role(footMan)
 const gameNew = new Game()
 const goldCoinInMapNew = new Role(goldCoinInMap)
