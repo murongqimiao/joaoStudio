@@ -12,6 +12,8 @@ class Game {
     allRenderList = []
     currentRoleId = 0
     debug = 1
+    currentFrameIndexPerSeconde = 0
+    gameFPS = 60
     constructor(props) {
 
     }
@@ -21,23 +23,22 @@ class Game {
         let needUpdate = false
         this.allRenderList.forEach((v, index) => {
             v.action && v.action(this)
-            if (v.oldPosition && v.oldPosition.length) { // 移动过的元素才需要进行碰撞检测
-                this.allRenderList.forEach((item, itemIndex) => {
-                    // computed collision
-                    if (v.currentId !== item.currentId && v.curRender.lastFrame && item.curRender.lastFrame && collisionDetection(v, item)) {
-                        v.onCrash && v.onCrash(v, item, this)
-                        item.onCrash && item.onCrash(item, v, this)
-                        // crash and get back old position
-                        console.log("==============on crash============")
-                        console.log(v)
-                        v.position = v.oldPosition.shift()
-                        v.oldPosition = []
-                    }
-                })
-            }
-            if (v.oldPosition && v.oldPosition.length > 10) {
-                v.oldPosition = v.oldPosition.slice(-10)
-            }
+            // if (v.oldPosition) { // 移动过的元素才需要进行碰撞检测
+            //     this.allRenderList.forEach((item, itemIndex) => {
+            //         // computed collision
+            //         if (v.currentId !== item.currentId && v.curRender.lastFrame && item.curRender.lastFrame && collisionDetection(v, item)) {
+            //             v.onCrash && v.onCrash(v, item, this)
+            //             item.onCrash && item.onCrash(item, v, this)
+            //             // crash and get back old position
+            //             // console.log("==============on crash  this.position============")
+            //             // console.log(v.oldPosition)
+            //             if (v.oldPosition) {
+            //                 v.position = v.oldPosition
+            //             }
+            //             delete v.oldPosition
+            //         }
+            //     })
+            // }
             if (v.delete) { needUpdate = true }
         })
         if (needUpdate) {
@@ -52,11 +53,19 @@ class Game {
         this.allRenderList.forEach(v => {
             v.render && v.render({ ctx, debug: this.debug })
         })
+        // 打印FPS
+        ctx.fillText(`FPS: ${this.gameFPS}`, 10, 10)
 
         // 执行下一帧
+        this.currentFrameIndexPerSeconde++
         window.requestAnimationFrame(() => {
             this.run()
         })
+    }
+
+    getFPS() {
+        this.gameFPS = this.currentFrameIndexPerSeconde
+        this.currentFrameIndexPerSeconde = 0
     }
 
     start() {
@@ -167,17 +176,19 @@ class Game {
     onMonsterMoveEnd(monster) { }
     onHeroMoveEnd(hero) { }
 
-    // 检测某个元素是否
+    // 检测某个元素是否碰撞
     checkCrashByCurrentId(currentId) {
         let hasCrash = false
         this.allRenderList.forEach((v, index) => {
             if (v.currentId === currentId) {
                 this.allRenderList.forEach((item, itemIndex) => {
                     // computed collision
-                    if (v.currentId !== item.currentId && item.state.volumeInfo.solid && collisionDetection(v, item)) {
+                    if (v.currentId !== item.currentId && v.curRender.lastFrame && item.curRender.lastFrame && collisionDetection(v, item)) {
                         v.onCrash && v.onCrash(v, item, this)
                         item.onCrash && item.onCrash(item, v, this)
-                        hasCrash = true
+                        if (item.state.volumeInfo.solid) {
+                            hasCrash = true
+                        }
                         // crash and get back old position
                     }
                 })
@@ -219,21 +230,22 @@ class Role {
         this.framePerChange = props.framePerChange || {}
         this.zIndex = props.zIndex || 1
     }
-    addPosition(params, oldPosition) {
+    addPosition(params) {
         const { x, y, z = 0, yRegression = 0 } = params;
         if (!this.position.x) {
             // 首次添加, 不需要记录oldposition
-            this.position = { x, y, z, yRegression }
+            this.position =  { x, y, z, yRegression }
         } else {
             // 动态更新时候需要检测碰撞
             if (window.__game.checkCrashByCurrentId(this.currentId)) {
-                console.log("========oldPosition========")
-                console.log(oldPosition)
-                console.log("碰撞了")
-                console.log(this.position)
-                this.position = oldPosition
+                this.position = JSON.parse(JSON.stringify(this.oldPosition))
+                delete this.oldPosition
+            } else {
+                this.oldPosition = JSON.parse(JSON.stringify(this.position))
+                this.position =  { x, y, z, yRegression }
             }
         }
+        
         return this;
 
     }
@@ -325,7 +337,7 @@ window.__monsterList = {
 window.__game = gameNew
 window.__Role = Role
 
-footManNew.addPosition({ x: 300, y: 300, z: 0, yRegression: 20 }).addAction('action', walking)
+footManNew.addPosition({ x: 300, y: 300, z: 0, yRegression: 10 }).addAction('action', walking)
 goldCoinInMapNew.addPosition({ x: 300, y: 100, z: 0, yRegression: 5 })
 Monster01New.addPosition({ x: 100, y: 200, z: 0, yRegression: 5 })
 
@@ -391,6 +403,9 @@ document.onkeypress = (e) => {
 const that = this;
 startPollingImgStatus(() => {
     gameNew.start()
+    setInterval(() => {
+        gameNew.getFPS()
+    }, 1000);
 })
 
 

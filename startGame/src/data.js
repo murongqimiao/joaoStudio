@@ -330,52 +330,52 @@ export const goldCoinInMap = {
     }
     switch (direct) {
         case 'TOP':
-            this.addPosition(Object.assign(this.position, { y: this.position.y - spd }), oldPosition)
+            this.addPosition(Object.assign(oldPosition, { y: this.position.y - spd }))
             break
         case 'TOP_RIGHT':
-            this.addPosition(Object.assign(this.position, { x: this.position.x + spd, y: this.position.y - spd }), oldPosition)
+            this.addPosition(Object.assign(oldPosition, { x: this.position.x + spd, y: this.position.y - spd }))
             break
         case 'TOP_LEFT':
-            this.addPosition(Object.assign(this.position, { x: this.position.x - spd, y: this.position.y - spd }), oldPosition)
+            this.addPosition(Object.assign(oldPosition, { x: this.position.x - spd, y: this.position.y - spd }))
             break
         case 'RIGHT':
-            this.addPosition(Object.assign(this.position, { x: this.position.x + spd }), oldPosition)
+            this.addPosition(Object.assign(oldPosition, { x: this.position.x + spd }))
             break
         case 'BOTTOM':
-            this.addPosition(Object.assign(this.position, { y: this.position.y + spd }), oldPosition)
+            this.addPosition(Object.assign(oldPosition, { y: this.position.y + spd }))
             break
         case 'LEFT':
-            this.addPosition(Object.assign(this.position, { x: this.position.x - spd }), oldPosition)
+            this.addPosition(Object.assign(oldPosition, { x: this.position.x - spd }))
             break
         case 'BOTTOM_LEFT':
-            this.addPosition(Object.assign(this.position, { x: this.position.x - spd, y: this.position.y + spd }), oldPosition)
+            this.addPosition(Object.assign(oldPosition, { x: this.position.x - spd, y: this.position.y + spd }))
             break
         case 'BOTTOM_RIGHT':
-            this.addPosition(Object.assign(this.position, { x: this.position.x + spd, y: this.position.y + spd }), oldPosition)
+            this.addPosition(Object.assign(oldPosition, { x: this.position.x + spd, y: this.position.y + spd }))
             break
         case 'TOP_RUN':
-            this.addPosition(Object.assign(this.position, { y: this.position.y - spd * 2 }), oldPosition)
+            this.addPosition(Object.assign(oldPosition, { y: this.position.y - spd * 2 }))
             break
         case 'TOP_RIGHT_RUN':
-            this.addPosition(Object.assign(this.position, { x: this.position.x + spd * 2, y: this.position.y - spd * 2 }), oldPosition)
+            this.addPosition(Object.assign(oldPosition, { x: this.position.x + spd * 2, y: this.position.y - spd * 2 }))
             break
         case 'TOP_LEFT_RUN':
-            this.addPosition(Object.assign(this.position, { x: this.position.x - spd * 2, y: this.position.y - spd * 2 }), oldPosition)
+            this.addPosition(Object.assign(oldPosition, { x: this.position.x - spd * 2, y: this.position.y - spd * 2 }))
             break
         case 'RIGHT_RUN':
-            this.addPosition(Object.assign(this.position, { x: this.position.x + spd * 2 }), oldPosition)
+            this.addPosition(Object.assign(oldPosition, { x: this.position.x + spd * 2 }))
             break
         case 'BOTTOM_RUN':
-            this.addPosition(Object.assign(this.position, { y: this.position.y + spd * 2 }), oldPosition)
+            this.addPosition(Object.assign(oldPosition, { y: this.position.y + spd * 2 }))
             break
         case 'LEFT_RUN':
-            this.addPosition(Object.assign(this.position, { x: this.position.x - spd * 2 }), oldPosition)
+            this.addPosition(Object.assign(oldPosition, { x: this.position.x - spd * 2 }))
             break
         case 'BOTTOM_LEFT_RUN':
-            this.addPosition(Object.assign(this.position, { x: this.position.x - spd * 2, y: this.position.y + spd * 2 }), oldPosition)
+            this.addPosition(Object.assign(oldPosition, { x: this.position.x - spd * 2, y: this.position.y + spd * 2 }))
             break
         case 'BOTTOM_RIGHT_RUN':
-            this.addPosition(Object.assign(this.position, { x: this.position.x + spd * 2, y: this.position.y + spd * 2 }), oldPosition)
+            this.addPosition(Object.assign(oldPosition, { x: this.position.x + spd * 2, y: this.position.y + spd * 2 }))
             break
         default: this.curEvent = 'DEFAULT'
     }
