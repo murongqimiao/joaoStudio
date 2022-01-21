@@ -11,7 +11,7 @@
  */
 
 export const collisionDetection = (objectA, objectB) => {
-    const type = objectA.state.volumeInfo.shape + '_' + objectB.state.volumeInfo.shape
+    const type = objectA.curRender.curFrameInfo.shape + '_' + objectB.curRender.curFrameInfo.shape
     switch (type) {
         case 'rectangle_rectangle':
             return rectanglesCollisionDetection(getBulkBorder(objectA), getBulkBorder(objectB));
@@ -27,27 +27,35 @@ export const collisionDetection = (objectA, objectB) => {
 
 /**
  * 获取角色体积边界,用来debug描边
+ * x1y1 --------- x4y4
+ *   |             |
+ *   |             |
+ *   |             |
+ * x2y2 -------- x3y3
  * @param {*} bulk 
  * @returns 
  */
-export const getBulkBorder = (bulk) => {
-    if (bulk.state.volumeInfo.shape === 'circle') {
+export const getBulkBorder = (bulk, xywhs, centerOriginxy, imgSize) => {
+    const { x, y } = bulk.position
+    if (!xywhs) { xywhs = getXYWHSByString(bulk.curRender.curFrameInfo.volumeInfo) }
+    if (!centerOriginxy) { centerOriginxy = getCenterOriginByString(bulk.curRender.curFrameInfo.centerOrigin) }
+    if (!imgSize) { imgSize = getCenterOriginByString(bulk.curRender.curFrameInfo.imgSizeInfo) }
+    if (bulk.curRender.curFrameInfo.shape === 'circle') {
         const { x1, y1, x3, y3 } = bulk.curRender.lastFrame
         // case circle return x1,y1 r
         return [(x1 / 2 + x3 / 2), (y1 / 2 + y3 / 2), bulk.state.volumeInfo.r]
-    } else if ((bulk.state.volumeInfo.shape === 'rectangle')) {
-        let { x1, y1, x2, y2, x3, y3, x4, y4 } = bulk.curRender.lastFrame
-        if (bulk && bulk.position && bulk.position.yRegression) {
-            y1 += bulk.position.yRegression
-            y2 += bulk.position.yRegression
-            y3 += bulk.position.yRegression
-            y4 += bulk.position.yRegression
-        }
-        const { width, height } = bulk.state.volumeInfo
-        const dx = (x3 - x1 - width) / 2
-        const dy = (y3 - y1 - height) / 2
-        // case rectangle return x1,y1, x2,y2 x3,y3, x4,y4
-        return [x1 + dx, y1 + dy, x2 + dx, y2 - dy, x3 - dx, y3 - dy, x4 - dx, y4 + dy]
+    } else if ((bulk.curRender.curFrameInfo.shape === 'rectangle')) {
+        let x1,y1,x2,y2,x3,y3,x4,y4
+        let renderXInCanvas = Math.round(x - centerOriginxy.x)
+        let renderYInCanvas = Math.round(y - centerOriginxy.y)
+        // computed volume x1y1 x2y2 x3y3 x4y4 position
+        
+        x2 = x1 = renderXInCanvas + xywhs.x
+        y4 = y1 = renderYInCanvas + xywhs.y
+        y3 = y2 = y1 + xywhs.height
+        x3 = x4 = x1 + xywhs.width
+
+        return [x1,y1,x2,y2,x3,y3,x4,y4]
     }
 }
 
@@ -145,4 +153,29 @@ const circlesCollisionDetection = ([Ax1, Ax2, Ar1], [Bx1, Bx2, Ar2]) => {
 
 const computedDistance = (x1, y1, x2, y2) => {
     return Math.sqrt(Math.pow(Math.abs(x1 - x2), 2) + Math.pow(Math.abs(y1 - y2), 2))
+}
+
+/**
+ * get position x position y width height isSolid by string 1_2_3_4_0
+ */
+export const getXYWHSByString = (str) => {
+    const [x = 0, y = 0, width = 0, height = 0, isSolid = false] = str.split("_")
+    return {
+        x: Number(x),
+        y: Number(y),
+        width: Number(width),
+        height: Number(height),
+        isSolid: Boolean(isSolid)
+    }
+}
+
+/**
+ * get position x position y width str
+ */
+export const getCenterOriginByString = (str) => {
+    const [x = 0, y = 0] = str.split("_")
+    return {
+        x: Number(x),
+        y: Number(y),
+    }
 }

@@ -1,5 +1,6 @@
-import { footMan, Monster01, goldCoinInMap, walking, getImageFromX_Y, CONSTANT_COMMON } from "./data"
-import { collisionDetection, getBulkBorder } from "./utils/collisionDetection"
+// import { footMan, Monster01, goldCoinInMap, walking, getImageFromX_Y, CONSTANT_COMMON } from "./data"
+import { monster_01, user, walking } from "./cq_data"
+import { collisionDetection, getBulkBorder, getXYWHSByString, getCenterOriginByString } from "./utils/collisionDetection"
 import { startPollingImgStatus } from "./utils/checkResourceLoad"
 import { drawDot, drawPolygon } from "./utils/canvasTool"
 
@@ -149,11 +150,10 @@ class Game {
     filterRenderListByPositionY() {
         // 根据y坐标调整角色渲染层级
         this.allRenderList.sort((a, b) => {
-            if (a.curEvent && a.curRender.imgClass && b.curEvent && b.curRender.imgClass) {
-                let aImageInfo = getImageFromX_Y(a.curRender.imgClass, a.curRender.imgLR)
-                let bImageInfo = getImageFromX_Y(b.curRender.imgClass, b.curRender.imgLR)
-                // console.log(aImageInfo.height, bImageInfo.height)
-                return ((aImageInfo.height || 0) + a.position.y) - ((bImageInfo.height || 0) + b.position.y)
+            if (a.curEvent && a.curRender.curFrameInfo && b.curEvent && b.curRender.curFrameInfo) {
+                let aImageInfo = getCenterOriginByString(a.curRender.curFrameInfo.centerOrigin)
+                let bImageInfo = getCenterOriginByString(a.curRender.curFrameInfo.centerOrigin)
+                return ((a.position.y - aImageInfo.y) - (b.position.y - bImageInfo.y))
             } else {
                 return false
             }
@@ -183,7 +183,7 @@ class Game {
             if (v.currentId === currentId) {
                 this.allRenderList.forEach((item, itemIndex) => {
                     // computed collision
-                    if (v.currentId !== item.currentId && v.curRender.lastFrame && item.curRender.lastFrame && collisionDetection(v, item)) {
+                    if (v.currentId !== item.currentId && v.curRender.curFrameInfo && item.curRender.curFrameInfo && collisionDetection(v, item)) {
                         v.onCrash && v.onCrash(v, item, this)
                         item.onCrash && item.onCrash(item, v, this)
                         if (item.state.volumeInfo.solid) {
@@ -214,7 +214,7 @@ class Role {
     frameList = {}
     frameInfo = {
         frameList: {
-            walking
+            // walking
         },
         curFrame: 0,
         frameCount: 0,
@@ -245,9 +245,7 @@ class Role {
                 this.position =  { x, y, z, yRegression }
             }
         }
-        
         return this;
-
     }
     initFrameInfo(curEvent) {
         this.curRender.curFrame = 0
@@ -259,10 +257,13 @@ class Role {
     // 渲染逻辑 找到指定的某个图片 某一帧  渲染到canvas里
     render() {
         const { ctx, debug } = arguments[0]
+        let curRenderBother = null
         if (this.curEvent && this.framesList[this.curEvent]) {
+            const frameList = this.framesList[this.curEvent]
+            let { curFrameImgIndex, curFrame } = this.curRender
             // 命中当前行为 进行渲染
-            if (this.curRender.curFrame === this.framePerChange[this.curEvent]) { // 动画行进到下一张
-                if (this.curRender.curFrameImgIndex === this.framesList[this.curEvent].length - 1) { // 重复动画归0
+            if (curFrame === frameList[curFrameImgIndex].frameStayTime) { // 动画行进到下一张
+                if (curFrameImgIndex === frameList.length - 1) { // 重复动画归0
                     // 钩子 执行完动画后, 判断帧动画结束时间是否存在
                     this.nextFrameEndEvent && this.nextFrameEndEvent.length && this.nextFrameEndEvent.shift()() // 帧动画结束事件
                     this.curRender.curFrameImgIndex = 0
@@ -272,40 +273,37 @@ class Role {
                     this.curRender.curFrame = 0
                 }
             }
-            const { imgClass, imgLR } = this.framesList[this.curEvent][this.curRender.curFrameImgIndex]
-            this.curRender.imgClass = imgClass
-            this.curRender.imgLR = imgLR
+            // 提取img resource
+            curRenderBother = frameList[curFrameImgIndex]
+            this.curRender.curFrame++
         }
-        this.curRender.curFrame++
-        const { sx, sy, swidth, sheight, width, height, } = getImageFromX_Y(this.curRender.imgClass, this.curRender.imgLR)
-        const Img = document.getElementsByClassName(this.curRender.imgClass)[0]
-        const { x, y } = this.position
-        this.curRender.lastFrame = { // remember last frame animation
-            x1: x,
-            y1: y,
-            x2: x,
-            y2: y + height,
-            x3: x + width,
-            y3: y + height,
-            x4: x + width,
-            y4: y,
-        }
-        ctx.drawImage(Img, sx, sy, swidth, sheight, x, y, width, height)
-        // console.log(this.curRender.imgClass, x, y,)
-        if (debug) {
-            // 体积描边
-            // console.log("========start debug 描边==========")
-            const borderData = getBulkBorder(this);
-            switch (this.state.volumeInfo.shape) {
-                case 'rectangle':
-                    drawPolygon({ ctx }, borderData);
-                    break;
-                case 'circle':
-                    drawDot({ ctx }, borderData)
-                    break;
-                default: () => { }
+        const Img = window.resources[curRenderBother.name]
+        const xywhs = getXYWHSByString(curRenderBother.volumeInfo)
+        const centerOriginxy = getCenterOriginByString(curRenderBother.centerOrigin)
+        const imgSize = getCenterOriginByString(curRenderBother.imgSizeInfo)
+        if (curRenderBother) {
+            this.curRender.curFrameInfo = curRenderBother
+            const { x, y } = this.position
+            let renderXInCanvas = Math.round(x - centerOriginxy.x)
+            let renderYInCanvas = Math.round(y - centerOriginxy.y)
+            ctx.drawImage(Img, 0, 0,imgSize.x, imgSize.y, renderXInCanvas, renderYInCanvas, imgSize.x, imgSize.y)
+
+            if (debug) {
+                // 体积描边
+                const borderData = getBulkBorder(this, xywhs, centerOriginxy, imgSize);
+                switch (this.curRender.curFrameInfo.shape) {
+                    case 'rectangle':
+                        drawPolygon({ ctx }, borderData);
+                        break;
+                    case 'circle':
+                        drawDot({ ctx }, borderData)
+                        break;
+                    default: () => { }
+                }
+                drawDot({ ctx, color: 'yellow' }, [this.position.x, this.position.y, 1] )
             }
         }
+      
         return this
     }
     addAction(eventName, func) {
@@ -330,32 +328,20 @@ class Role {
  let files = require.context("./assets", true, /\.png/)
  let filesPaths = files.keys()
  filesPaths.forEach(v => {
-     let _img = document.createElement('img')
+     let _img = new Image()
      _img.src = "./assets/" + v
-     document.body && document.body.appendChild(_img)
-     window.resources = Object.assign({}, (window.resources || {}), { [`${v.replaceAll('png', '').replaceAll('.', '').replaceAll('/', '_')}`]: _img })
+     _img.onload = () => {
+        window.resources = Object.assign({}, (window.resources || {}), { [`${v.replaceAll('png', '').replaceAll('.', '').replaceAll('/', '_')}`]: _img })
+     }
+     
  })
 
-const footManNew = new Role(footMan)
+const userNew = new Role(user)
+const monster_01_new = new Role(monster_01)
 const gameNew = new Game()
-const goldCoinInMapNew = new Role(goldCoinInMap)
-const Monster01New = new Role(Monster01)
-window.__heroList = {
-    [footManNew.state.id]: footMan
-}
-window.__monsterList = {
-    [goldCoinInMapNew.state.id]: goldCoinInMap,
-    [Monster01New.state.id]: Monster01
-}
 window.__game = gameNew
 window.__Role = Role
 
-footManNew.addPosition({ x: 300, y: 300, z: 0, yRegression: 10 }).addAction('action', walking)
-goldCoinInMapNew.addPosition({ x: 300, y: 100, z: 0, yRegression: 5 })
-Monster01New.addPosition({ x: 100, y: 200, z: 0, yRegression: 5 })
-
-window.__game.addNewHero(footManNew).addNewMonster(goldCoinInMapNew).addNewMonster(Monster01New)
-// window.__game.addNewHero(footManNew).addNewMonster(Monster01New)
 
 
 
@@ -419,6 +405,13 @@ startPollingImgStatus(() => {
     setInterval(() => {
         gameNew.getFPS()
     }, 1000);
+
+    setTimeout(() => {
+        userNew.addPosition({ x: 100, y: 100, z: 0 }).addAction('action', walking)
+        monster_01_new.addPosition({ x: 100, y: 200, z: 0 })
+        gameNew.addNewHero(userNew).addNewMonster(monster_01_new)
+    }, 2000);
+
 })
 
 
