@@ -12,19 +12,20 @@ export const CONSTANT_COMMON = {
         new_dco004: '75_85_40_40_1',
         new_dco005: '80_40_20_20_1',
         new_ms001: '60_85_35_35_1',
-        new_ms002: '80_40_20_20_1'
+        new_ms002: '90_100_40_40_1',
     },
     COMMON_ORIGIN_CENTER: {
         new_dco004: '95_125',
         new_dco005: '100_117',
         new_ms001: '78_120',
-        new_ms002: '110_120'
+        new_ms002: '108_140'
     },
     BASE_HERO_HP: 3,
     BASE_HERO_ATK: 1,
     BASE_HERO_DEF: 0,
     BASE_HERO_MAGIC: 3,
-    BASE_HERO_SPD: 2,
+    BASE_HERO_SPD: 4,
+    BASE_MONSTER_SPD: 1,
     BASE_ONE_SECOND: 60,
     DPR: 3,
     INFINITY: 999999999,
@@ -60,6 +61,11 @@ const generateFrameList = (params) => {
             if (frameMaxNum) {
                 for (let i = 0; i <= frameMaxNum; i++) {
                     let _name = `_character_${type}_${name}_${index}_${key}_${i}`
+
+                    if (type === 'monster' && key === 'run') { // monster没有run 动作用stand取代
+                        _name = `_character_${type}_${name}_${index}_stand_${i}`
+                    }
+
                     frameItem.push({
                         name: _name,
                         frameStayTime,
@@ -168,7 +174,7 @@ export const user = {
         hp: CONSTANT_COMMON.BASE_HERO_HP,
         atk: CONSTANT_COMMON.BASE_HERO_ATK,
         def: CONSTANT_COMMON.BASE_HERO_DEF,
-        spd: CONSTANT_COMMON.BASE_HERO_SPD,
+        spd: CONSTANT_COMMON.BASE_MONSTER_SPD,
         isSolid: true,
         isHero: true,
         volumeInfo: {
@@ -181,7 +187,10 @@ export const user = {
             id: 1,
             number: 0
         }],
-        defaultEvent: '0_stand'
+        defaultEvent: '0_stand',
+        codeDownTime: {
+            attack: 100
+        },
     },
     skill: {
         cd: CONSTANT_COMMON.BASE_ONE_SECOND
@@ -192,7 +201,7 @@ export const user = {
     framesList: generateFrameList({
         name: 'new_ms001',
         type: 'monster',
-        attackTime: 6,
+        attackTime: 5,
         attackFrame: 5,
         deathTime: 3,
         deathFrame: 5,
@@ -202,7 +211,7 @@ export const user = {
         skillFrame: 5,
         standTime: 3,
         standFrame: 20,
-        runTime: 7,
+        runTime: 3,
         runFrame: 20,
         imgSizeInfo: CONSTANT_COMMON.COMMON_IMG_SIZE['new_ms001'],
         volumeInfo: CONSTANT_COMMON.COMMON_VOLUME_SIZE['new_ms001'],
@@ -225,12 +234,91 @@ export const user = {
 }
 
 /**
+ * main role info  {}
+ *      [role, skill]
+ *      role {}
+ *          [name, des, hp, atk, def, magic, spd]
+ *      skill {}
+ *          [cd]
+ */
+ export const monster_02 = {
+    role: {
+        id: 2,
+        name: "new_ms002",
+        des: "monster named deer",
+        hp: CONSTANT_COMMON.BASE_HERO_HP,
+        atk: CONSTANT_COMMON.BASE_HERO_ATK,
+        def: CONSTANT_COMMON.BASE_HERO_DEF,
+        spd: CONSTANT_COMMON.BASE_MONSTER_SPD,
+        isSolid: true,
+        isHero: true,
+        volumeInfo: {
+            shape: 'rectangle',
+            width: 30,
+            height: 80,
+            solid: true,
+        },
+        knapsack: [{
+            id: 1,
+            number: 0
+        }],
+        codeDownTime: {
+            attack: 100
+        },
+        defaultEvent: '0_stand'
+    },
+    skill: {
+        cd: CONSTANT_COMMON.BASE_ONE_SECOND
+    },
+    zIndex: 10,
+    // 图片渲染的优化方向, 提供一个使用大图的高宽及横纵下标返回图片的能力
+  
+    framesList: generateFrameList({
+        name: 'new_ms002',
+        type: 'monster',
+        attackTime: 5,
+        attackFrame: 10,
+        deathTime: 3,
+        deathFrame: 5,
+        hitTime: 2,
+        hitFrame: 5,
+        skillTime: 6,
+        skillFrame: 5,
+        standTime: 3,
+        standFrame: 20,
+        runTime: 3,
+        runFrame: 20,
+        imgSizeInfo: CONSTANT_COMMON.COMMON_IMG_SIZE['new_ms002'],
+        volumeInfo: CONSTANT_COMMON.COMMON_VOLUME_SIZE['new_ms002'],
+        centerOrigin: CONSTANT_COMMON.COMMON_ORIGIN_CENTER['new_ms002'],
+        shape: 'rectangle'
+    }),
+    onMonsterAdd: function () {
+        const [game, self] = arguments
+        self.curEvent = self.state.defaultEvent
+    },
+    onCrash: function () {
+        const [self, crashItem] = arguments
+        if (crashItem.state.isSolid) {
+            if (self.curRender.lastFrame) {
+                this.position.x = self.curRender.lastFrame.x1
+                this.position.y = self.curRender.lastFrame.y1
+            }
+        }
+    }
+}
+
+/**
  * action info {}
  * 
  */
  export const walking = function (game) {
+    const that = this
     const { spd } = this.state;
-    const oldPosition = JSON.parse(JSON.stringify(this.position))
+    if (this.curEvent.includes('hit')) { // hit 状态下不能进行任何操作
+        return
+    }
+    
     let direct = this.state.defaultEvent
     let computedKeyList = JSON.parse(JSON.stringify(game.keyCollect))
     let computedKeyListBuffer = JSON.parse(JSON.stringify(game.keyCollectBuffer))
@@ -281,58 +369,106 @@ export const user = {
             this.curRender.curFrame = 0
         }
     }
-    switch (direct) {
+    handleMove(direct, that)
+    return this;
+}
+
+/**
+ * monster basic action
+ */
+export const monsterEventHandler = function (game)  {
+    const that = this
+    if (this.curEvent.includes('_run')) {
+        handleMove(this.curEvent, that)
+    }
+    if (this.curEvent.includes('_stand')) {
+        handleMonsterStand(this.curEvent, that)
+    }
+    if (this.curEvent.includes('_attack')) {
+        if (this.state.codeDownTime.attack) {
+                if (!this.state.codeDownTime.attackCurTime) {
+                    console.log("this.state.codeDownTime.attackCurTime")
+                    console.log(this.state.codeDownTime.attackCurTime)
+                    this.state.codeDownTime.attackCurTime = (this.state.codeDownTime.attackCurTime || 0) + 1
+                    console.log(this.state.codeDownTime.attackCurTime)
+                } else if (this.state.codeDownTime.attackCurTime === this.state.codeDownTime.attack) {
+                    this.state.codeDownTime.attackCurTime = 1
+                } else if (this.state.codeDownTime.attackCurTime > (this.curRender.curFrameInfo.frameStayTime * this.framesList[this.curEvent].length)) {
+                    this.initFrameInfo(this.curEvent)
+                    this.state.codeDownTime.attackCurTime += 1
+                } else {
+                    this.state.codeDownTime.attackCurTime += 1
+                }
+        } 
+    }
+}
+
+/**
+ * handle move
+ */
+const handleMove = function (event, that) {
+    const oldPosition = JSON.parse(JSON.stringify(that.position))
+    const { spd } = that.state;
+    switch (event) {
         case '0_run':
-            this.addPosition(Object.assign(oldPosition, { y: this.position.y - spd }))
+            that.addPosition(Object.assign(oldPosition, { y: that.position.y - spd }))
             break
         case '1_run':
-            this.addPosition(Object.assign(oldPosition, { x: this.position.x + spd, y: this.position.y - spd }))
+            that.addPosition(Object.assign(oldPosition, { x: that.position.x + spd, y: that.position.y - spd }))
             break
         case '7_run':
-            this.addPosition(Object.assign(oldPosition, { x: this.position.x - spd, y: this.position.y - spd }))
+            that.addPosition(Object.assign(oldPosition, { x: that.position.x - spd, y: that.position.y - spd }))
             break
         case '2_run':
-            this.addPosition(Object.assign(oldPosition, { x: this.position.x + spd }))
+            that.addPosition(Object.assign(oldPosition, { x: that.position.x + spd }))
             break
         case '4_run':
-            this.addPosition(Object.assign(oldPosition, { y: this.position.y + spd }))
+            that.addPosition(Object.assign(oldPosition, { y: that.position.y + spd }))
             break
         case '6_run':
-            this.addPosition(Object.assign(oldPosition, { x: this.position.x - spd }))
+            that.addPosition(Object.assign(oldPosition, { x: that.position.x - spd }))
             break
         case '5_run':
-            this.addPosition(Object.assign(oldPosition, { x: this.position.x - spd, y: this.position.y + spd }))
+            that.addPosition(Object.assign(oldPosition, { x: that.position.x - spd, y: that.position.y + spd }))
             break
         case '3_run':
-            this.addPosition(Object.assign(oldPosition, { x: this.position.x + spd, y: this.position.y + spd }))
-            break
-        case '0_run':
-            this.addPosition(Object.assign(oldPosition, { y: this.position.y - spd * 2 }))
-            break
-        case '1_run':
-            this.addPosition(Object.assign(oldPosition, { x: this.position.x + spd * 2, y: this.position.y - spd * 2 }))
-            break
-        case '7_run':
-            this.addPosition(Object.assign(oldPosition, { x: this.position.x - spd * 2, y: this.position.y - spd * 2 }))
-            break
-        case '2_run':
-            this.addPosition(Object.assign(oldPosition, { x: this.position.x + spd * 2 }))
-            break
-        case '4_run':
-            this.addPosition(Object.assign(oldPosition, { y: this.position.y + spd * 2 }))
-            break
-        case '6_run':
-            this.addPosition(Object.assign(oldPosition, { x: this.position.x - spd * 2 }))
-            break
-        case '5_run':
-            this.addPosition(Object.assign(oldPosition, { x: this.position.x - spd * 2, y: this.position.y + spd * 2 }))
-            break
-        case '3_run':
-            this.addPosition(Object.assign(oldPosition, { x: this.position.x + spd * 2, y: this.position.y + spd * 2 }))
+            that.addPosition(Object.assign(oldPosition, { x: that.position.x + spd, y: that.position.y + spd }))
             break
         default: () => {}
     }
+}
 
-
-    return this;
+/**
+ * handle monster stand
+ */
+const handleMonsterStand = function (event, that) {
+    const oldPosition = JSON.parse(JSON.stringify(that.position))
+    const { spd } = that.state;
+    switch (event) {
+        case '0_run':
+            that.addPosition(Object.assign(oldPosition, { y: that.position.y - spd }))
+            break
+        case '1_run':
+            that.addPosition(Object.assign(oldPosition, { x: that.position.x + spd, y: that.position.y - spd }))
+            break
+        case '7_run':
+            that.addPosition(Object.assign(oldPosition, { x: that.position.x - spd, y: that.position.y - spd }))
+            break
+        case '2_run':
+            that.addPosition(Object.assign(oldPosition, { x: that.position.x + spd }))
+            break
+        case '4_run':
+            that.addPosition(Object.assign(oldPosition, { y: that.position.y + spd }))
+            break
+        case '6_run':
+            that.addPosition(Object.assign(oldPosition, { x: that.position.x - spd }))
+            break
+        case '5_run':
+            that.addPosition(Object.assign(oldPosition, { x: that.position.x - spd, y: that.position.y + spd }))
+            break
+        case '3_run':
+            that.addPosition(Object.assign(oldPosition, { x: that.position.x + spd, y: that.position.y + spd }))
+            break
+        default: () => {}
+    }
 }

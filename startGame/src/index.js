@@ -1,8 +1,9 @@
 // import { footMan, Monster01, goldCoinInMap, walking, getImageFromX_Y, CONSTANT_COMMON } from "./data"
-import { monster_01, user, walking } from "./cq_data"
+import { monster_01, monster_02, user, walking, monsterEventHandler } from "./cq_data"
 import { collisionDetection, getBulkBorder, getXYWHSByString, getCenterOriginByString } from "./utils/collisionDetection"
 import { startPollingImgStatus } from "./utils/checkResourceLoad"
 import { drawDot, drawPolygon } from "./utils/canvasTool"
+import { monsterMainMind } from "./utils/monsterAI"
 
 class Game {
     monsterList = []
@@ -23,23 +24,35 @@ class Game {
         // 执行行为
         let needUpdate = false
         this.allRenderList.forEach((v, index) => {
-            v.action && v.action(this)
-            // if (v.oldPosition) { // 移动过的元素才需要进行碰撞检测
-            //     this.allRenderList.forEach((item, itemIndex) => {
-            //         // computed collision
-            //         if (v.currentId !== item.currentId && v.curRender.lastFrame && item.curRender.lastFrame && collisionDetection(v, item)) {
-            //             v.onCrash && v.onCrash(v, item, this)
-            //             item.onCrash && item.onCrash(item, v, this)
-            //             // crash and get back old position
-            //             // console.log("==============on crash  this.position============")
-            //             // console.log(v.oldPosition)
-            //             if (v.oldPosition) {
-            //                 v.position = v.oldPosition
-            //             }
-            //             delete v.oldPosition
-            //         }
-            //     })
-            // }
+            v.trigger && v.trigger.forEach(triggerItem => {
+                    if (triggerItem.curTime === triggerItem.codeDownTime) {
+                        v[triggerItem.eventName] && v[triggerItem.eventName](this, triggerItem)
+                        triggerItem.curTime = 0
+                    } else {
+                        triggerItem.curTime++
+                    }
+            })
+            if (v.oldPosition) { // 移动过的元素才需要进行碰撞检测
+                this.allRenderList.forEach((item, itemIndex) => {
+                    // computed collision
+                    if (v.currentId !== item.currentId
+                        && v.curRender.curFrameInfo
+                        && v.curRender.curFrameInfo.shape
+                        && item.curRender.curFrameInfo
+                        && item.curRender.curFrameInfo.shape
+                        && collisionDetection(v, item)
+                    ) {
+                        // has crash
+                        v.onCrash && v.onCrash(v, item, this)
+                        item.onCrash && item.onCrash(item, v, this)
+                        // use postion before creash occur
+                        if (v.oldPosition) {
+                            v.position = JSON.parse(JSON.stringify(v.oldPosition))
+                        }
+                        delete v.oldPosition
+                    }
+                })
+            }
             if (v.delete) { needUpdate = true }
         })
         if (needUpdate) {
@@ -80,7 +93,7 @@ class Game {
     addNewMonster(monster) {
         monster.currentId = this.currentRoleId++
         this.monsterList.push(monster)
-        console.log("第一次addNewMonster,", this.monsterList)
+        console.log("addNewMonster,", this.monsterList)
         monster.onMonsterAdd && this.onMonsterAdd(monster)
         this.updateAllRenderList()
         return this;
@@ -233,25 +246,37 @@ class Role {
     addPosition(params) {
         const { x, y, z = 0, yRegression = 0 } = params;
         if (!this.position.x) {
-            // 首次添加, 不需要记录oldposition
-            this.position =  { x, y, z, yRegression }
+            this.oldPosition = JSON.parse(JSON.stringify({ x, y, z, yRegression }))
         } else {
-            // 动态更新时候需要检测碰撞
-            if (window.__game.checkCrashByCurrentId(this.currentId)) {
-                this.position = JSON.parse(JSON.stringify(this.oldPosition))
-                delete this.oldPosition
-            } else {
-                this.oldPosition = JSON.parse(JSON.stringify(this.position))
-                this.position =  { x, y, z, yRegression }
-            }
+            this.oldPosition = JSON.parse(JSON.stringify(this.position))
         }
+        this.position =  { x, y, z, yRegression }
         return this;
+    }
+    resetFrameInfo(eventName) {
+        this.curRender.curEvent = this.curEvent
+        if (!this.resetCurRender) this.resetCurRender = JSON.parse(JSON.stringify(this.curRender))
+        this.initFrameInfo(eventName)
+    }
+    recoverFrameInfo() {
+        if (this.resetCurRender) {
+            this.curRender = this.resetCurRender
+            this.curEvent = this.resetCurRender.curEvent
+            delete this.resetCurRender
+        }
     }
     initFrameInfo(curEvent) {
         this.curRender.curFrame = 0
         this.curRender.curFrameImgIndex = 0
         if (curEvent) {
             this.curEvent = curEvent
+        }
+    }
+    addFrameEndEvent(event) {
+        if (this.nextFrameEndEvent) {
+            this.nextFrameEndEvent.push(event)
+        } else {
+            this.nextFrameEndEvent = [event]
         }
     }
     // 渲染逻辑 找到指定的某个图片 某一帧  渲染到canvas里
@@ -306,10 +331,27 @@ class Role {
       
         return this
     }
-    addAction(eventName, func) {
+    addAction(eventName, func, config) {
+        if (config.needTrigger) {
+            if (!this.trigger) {
+                this.trigger = []
+            }
+            this.trigger.push({
+                eventName,
+                codeDownTime: config.codeDownTime || 0,
+                curTime: 0, // 当前执行了多少次
+                ...config
+            })
+        }
         this[eventName] = func.bind(this)
         return this;
     }
+    removeAction(eventName) {
+        this.trigger = this.trigger.filter(v => v.eventName !== eventName) || []
+        delete this[eventName]
+        return this;
+    }
+
     KnapsackGetSth(id, number) {
         if (this.state.knapsack && this.state.knapsack.length) {
             const haveThingList = this.state.knapsack.filter(v => v.id === id)
@@ -337,7 +379,7 @@ class Role {
  })
 
 const userNew = new Role(user)
-const monster_01_new = new Role(monster_01)
+const monster_01_new = new Role(monster_02)
 const gameNew = new Game()
 window.__game = gameNew
 window.__Role = Role
@@ -407,10 +449,21 @@ startPollingImgStatus(() => {
     }, 1000);
 
     setTimeout(() => {
-        userNew.addPosition({ x: 100, y: 100, z: 0 }).addAction('action', walking)
+        userNew.addPosition({ x: 100, y: 100, z: 0 }).addAction('action', walking, { needTrigger: true, codeDownTime: 0 })
         monster_01_new.addPosition({ x: 100, y: 200, z: 0 })
+        .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0 })
+        .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
         gameNew.addNewHero(userNew).addNewMonster(monster_01_new)
     }, 2000);
+
+    setInterval(() => {
+        gameNew.addNewMonster(
+            new Role(Math.random() > 0.5 ? monster_01 : monster_02)
+            .addPosition({ x: Math.random()*500, y: Math.random() * 500, z: 0 })
+            .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0})
+            .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
+        )
+    }, 9900);
 
 })
 

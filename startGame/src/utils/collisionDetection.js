@@ -151,8 +151,14 @@ const circlesCollisionDetection = ([Ax1, Ax2, Ar1], [Bx1, Bx2, Ar2]) => {
     return result
 }
 
-const computedDistance = (x1, y1, x2, y2) => {
+export const computedDistance = (x1, y1, x2, y2) => {
     return Math.sqrt(Math.pow(Math.abs(x1 - x2), 2) + Math.pow(Math.abs(y1 - y2), 2))
+}
+
+export const getDistancesWidth = (objectA, objectB) => {
+    const positionA = objectA.position
+    const positionB = objectB.position
+    return computedDistance(positionA.x, positionA.y, positionB.x, positionB.y)
 }
 
 /**
@@ -177,5 +183,45 @@ export const getCenterOriginByString = (str) => {
     return {
         x: Number(x),
         y: Number(y),
+    }
+}
+
+
+/**
+ * computed postion x1y1 and x2y2
+ * return direction of face to
+ * 7        0        1
+ *      _______
+ *     |        |
+ * 6   |  x1y1  |     2
+ *     |        |
+ *     |--------|
+ *  5       4        3
+ */
+export const getFaceToDirection = ({ x1, y1, x2, y2, abs = 10 }) => {
+    const x_abs = Math.abs(x1 - x2)
+    const y_abs = Math.abs(y1 - y2)
+    // y小于abs优先考虑 6 2
+    // x小于abs优先考虑 0 4
+    if (y_abs < abs) {
+        if (x1 < x2) {
+            return 2
+        } else {
+            return 6
+        }
+    } else if (x_abs < abs) {
+        if (y1 < y2) {
+            return 4
+        } else {
+            return 0
+        }
+    } else if (x1 < x2 && y1 < y2) {
+        return 3
+    } else if (x1 < x2 && y1 > y2) {
+        return 1
+    } else if (x1 > x2 && y1 < y2) {
+        return 5
+    }  else if (x1 > x2 && y1 > y2) {
+        return 7
     }
 }
