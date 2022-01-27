@@ -27,7 +27,7 @@ export const monsterMainMind = function() {
         x2: limitDistance.position.x,
         y2: limitDistance.position.y
     })
-    if (limitDistance && limitDistance.distance && limitDistance.distance < 50) { // 攻击距离
+    if (limitDistance && limitDistance.distance && limitDistance.distance < 70) { // 攻击距离
         // 执行攻击行为
         let event = direction + '_attack'
         tryEvent(event, monsterSelf)
@@ -85,7 +85,7 @@ const computedCodeDownTime = () => {
 const attackHero = function (game, triggerInfo) {
     const { attackAim } = triggerInfo
     if (this.curEvent.includes('attack') && this.curRender.curFrameImgIndex === 2) {
-        if (computedDistance(this.position.x, this.position.y, attackAim.position.x, attackAim.position.y) < 50) {
+        if (computedDistance(this.position.x, this.position.y, attackAim.position.x, attackAim.position.y) < 70) {
             // 命中
             let direction = getFaceToDirection({
                 x1: attackAim.position.x,

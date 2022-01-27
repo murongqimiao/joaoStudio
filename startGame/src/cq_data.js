@@ -336,6 +336,7 @@ export const user = {
         const hasInBuffer = (list) => {
             return list.map(v => computedKeyListBuffer.includes(v)).some(v => v)
         }
+        // 状态保持动作, 如移动, 需要按压施法
         if (check(['J', 'I'])) {
             direct = '7_run' + (hasInBuffer(['J', 'I']) ? '' : '')
         } else if (check(['I', 'L'])) {
@@ -353,6 +354,10 @@ export const user = {
         } else if (check(['L'])) {
             direct = '2_run' + (hasInBuffer(['L']) ? '' : '')
         }
+        if (check(['D'])) {
+            direct = this.curEvent.slice(0, 1) + '_attack'
+        }
+        // 单次执行动作, 如攻击,一次性技能
     }
     if (direct !== this.curEvent) { // 动作变更
         // 更换动作需要初始化的帧动画
