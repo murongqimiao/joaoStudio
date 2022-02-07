@@ -6,19 +6,34 @@ export const CONSTANT_COMMON = {
         new_dco004: '203_227',
         new_dco005: '199_234',
         new_ms001: '152_178',
-        new_ms002: '224_245'
+        new_ms002: '224_245',
+        new_jn10020: '374_438'
     },
     COMMON_VOLUME_SIZE: {
         new_dco004: '75_85_40_40_1',
         new_dco005: '80_40_20_20_1',
         new_ms001: '60_85_35_35_1',
         new_ms002: '90_100_40_40_1',
+        new_jn10020: [
+            '150_70_70_100_0',
+            '220_100_70_70_0',
+            '210_100_100_115_0',
+            '220_230_70_70_0',
+            '150_230_70_70_0',
+            '100_230_70_70_0',
+            '100_150_70_70_0',
+            '100_100_70_70_0'
+        ]
     },
     COMMON_ORIGIN_CENTER: {
         new_dco004: '95_125',
         new_dco005: '100_117',
         new_ms001: '78_120',
-        new_ms002: '108_140'
+        new_ms002: '108_140',
+        new_jn10020: '187_219'
+    },
+    SKILL_POSITION: { // 技能位置相对于人物当前方向的位移
+        skill_01: ['0_0', '0_0', '0_0', '0_0', '0_0', '0_0', '0_0', '0_0']
     },
     BASE_HERO_HP: 3,
     BASE_HERO_ATK: 1,
@@ -29,6 +44,7 @@ export const CONSTANT_COMMON = {
     BASE_ONE_SECOND: 60,
     DPR: 3,
     INFINITY: 999999999,
+    BASE_SKILL_HP: 1,
 }
 
 // current available img
@@ -36,7 +52,8 @@ const CONSTANT_IMG = {
     new_dco004: 'new_dco004',
     new_dco005: 'new_dco005',
     new_ms001: 'new_ms001',
-    new_ms002: 'new_ms002'
+    new_ms002: 'new_ms002',
+    new_jn10020: 'new_jn10020'
 }
 
 /**
@@ -50,7 +67,7 @@ const CONSTANT_IMG = {
  */
 const generateFrameList = (params) => {
     const direction = [0,1,2,3,4,5,6,7];
-    const defaultComputedKey = ['attack', 'death', 'hit', 'skill', 'stand', 'run']
+    const defaultComputedKey = params.computedKey || ['attack', 'death', 'hit', 'skill', 'stand', 'run']
     const { type = 'human', volumeInfo = '0_0_0_0_0', centerOrigin = '0_0', imgSizeInfo = '0_0', name, shape = 'rectangle' } = params
     let result = {}
     direction.forEach(index => {
@@ -61,16 +78,32 @@ const generateFrameList = (params) => {
             if (frameMaxNum) {
                 for (let i = 0; i <= frameMaxNum; i++) {
                     let _name = `_character_${type}_${name}_${index}_${key}_${i}`
-
+                    let _volumeInfo = volumeInfo
+                    let _centerOrigin = centerOrigin
                     if (type === 'monster' && key === 'run') { // monster没有run 动作用stand取代
                         _name = `_character_${type}_${name}_${index}_stand_${i}`
+                    }
+
+                    if (type === 'skill') {
+                        _name = `_${type}_${name}_${index}_stand_${i}`
+                    }
+
+                    if (typeof _volumeInfo !== 'string') {
+                        // string 类型是所有方向都可以通过一个xy来回归 否则走Array类型, 生成不同方向的回归坐标
+                        _volumeInfo = volumeInfo[index]
+                    }
+
+                    if (typeof _centerOrigin !== 'string') {
+                        _centerOrigin = centerOrigin[index]
+                        console.log("__________-centerOrigin_________")
+                        console.log(_centerOrigin)
                     }
 
                     frameItem.push({
                         name: _name,
                         frameStayTime,
-                        volumeInfo,
-                        centerOrigin,
+                        volumeInfo: _volumeInfo,
+                        centerOrigin: _centerOrigin,
                         imgSizeInfo,
                         shape
                     })
@@ -306,6 +339,37 @@ export const user = {
             }
         }
     }
+}
+
+/**
+ * skill info
+ * @param {*} game 
+ * @returns 
+ */
+export const skill_01 = {
+    state: {
+        name: CONSTANT_IMG.new_jn10020,
+        positionWidthHero: CONSTANT_COMMON.SKILL_POSITION.skill_01
+    },
+    framesList: generateFrameList({
+        name: CONSTANT_IMG.new_jn10020,
+        type: 'skill',
+        standTime: 5,
+        standFrame: 7,
+        imgSizeInfo: CONSTANT_COMMON.COMMON_IMG_SIZE[CONSTANT_IMG['new_jn10020']],
+        volumeInfo: CONSTANT_COMMON.COMMON_VOLUME_SIZE[CONSTANT_IMG['new_jn10020']],
+        centerOrigin: CONSTANT_COMMON.COMMON_ORIGIN_CENTER[CONSTANT_IMG['new_jn10020']],
+        shape: 'rectangle'
+    }),
+    onSkillAdd: function() {
+        console.log("=======on skill add=======")
+        console.log(arguments)
+    },
+    onCrash: function() {
+        console.log("========on skill crash========")
+        console.log(arguments)
+    }
+    
 }
 
 /**

@@ -1,20 +1,22 @@
 // import { footMan, Monster01, goldCoinInMap, walking, getImageFromX_Y, CONSTANT_COMMON } from "./data"
-import { monster_01, monster_02, user, walking, monsterEventHandler } from "./cq_data"
+import { monster_01, monster_02, user, walking, monsterEventHandler, skill_01 } from "./cq_data"
 import { collisionDetection, getBulkBorder, getXYWHSByString, getCenterOriginByString } from "./utils/collisionDetection"
 import { startPollingImgStatus } from "./utils/checkResourceLoad"
 import { drawDot, drawPolygon } from "./utils/canvasTool"
 import { monsterMainMind } from "./utils/monsterAI"
 import { addGameListener } from "./utils/addGameListener"
+import { attackAction } from "./utils/skills"
 
 class Game {
     monsterList = []
     heroList = []
+    skillList = []
     environmentList = [] // 环境资源
     keyCollect = []
     keyCollectBuffer = []
     allRenderList = []
     currentRoleId = 0
-    debug = 0
+    debug = 1
     currentFrameIndexPerSeconde = 0
     gameFPS = 60
     constructor(props) {
@@ -47,7 +49,10 @@ class Game {
                         v.onCrash && v.onCrash(v, item, this)
                         item.onCrash && item.onCrash(item, v, this)
                         // use postion before creash occur
-                        if (v.oldPosition) {
+                        if (v.oldPosition &&
+                            v.curRender.curFrameInfo.volumeInfo.slice(-1) === '1' &&
+                            item.curRender.curFrameInfo.volumeInfo.slice(-1) === '1') {
+                            // solid crash with solid thing need back old position
                             v.position = JSON.parse(JSON.stringify(v.oldPosition))
                         }
                         delete v.oldPosition
@@ -109,6 +114,15 @@ class Game {
         return this;
     }
 
+    addNewSkill(skillItem) {
+        skillItem.currentId = this.currentRoleId++
+        this.skillList.push(skillItem)
+        console.log("add new skill", this.skillList)
+        skillItem.onSkillAdd && skillItem.onSkillAdd(this).bind(skillItem)
+        this.updateAllRenderList()
+        return this;
+    }
+
     removeMonster(monster) {
         let index = this.monsterList.findIndex(v => v.name === monster.name)
         this.monsterList.splice(index, 1)
@@ -127,9 +141,20 @@ class Game {
         return this;
     }
 
+    removeSKill(skillItem) {
+        let index = this.skillList.findIndex(v => v.currentId === skillItem.currentId)
+        this.skillList.splice(index, 1)
+        console.log("remove skill item", this.skillList)
+        skillItem.onSkillRemove && skillItem.onSkillRemove(this).bind(skillItem)
+        this.updateAllRenderList()
+        return this;
+    }
+
+
+
     // 更新
     updateAllRenderList() {
-        this.allRenderList = [].concat(this.monsterList).concat(this.heroList).concat(this.environmentList).filter(v => !v.delete)
+        this.allRenderList = [].concat(this.monsterList).concat(this.heroList).concat(this.environmentList).concat(this.skillList).filter(v => !v.delete)
     }
 
     keyActiveCollect(handle, key) {
@@ -190,26 +215,6 @@ class Game {
     onMonsterMoveEnd(monster) { }
     onHeroMoveEnd(hero) { }
 
-    // 检测某个元素是否碰撞
-    checkCrashByCurrentId(currentId) {
-        let hasCrash = false
-        this.allRenderList.forEach((v, index) => {
-            if (v.currentId === currentId) {
-                this.allRenderList.forEach((item, itemIndex) => {
-                    // computed collision
-                    if (v.currentId !== item.currentId && v.curRender.curFrameInfo && item.curRender.curFrameInfo && collisionDetection(v, item)) {
-                        v.onCrash && v.onCrash(v, item, this)
-                        item.onCrash && item.onCrash(item, v, this)
-                        if (item.state.volumeInfo.solid) {
-                            hasCrash = true
-                        }
-                        // crash and get back old position
-                    }
-                })
-            }
-        })
-        return hasCrash;
-    }
 }
 
 class Role {
@@ -272,6 +277,7 @@ class Role {
         if (curEvent) {
             this.curEvent = curEvent
         }
+        return this;
     }
     addFrameEndEvent(event) {
         if (this.nextFrameEndEvent) {
@@ -364,6 +370,125 @@ class Role {
     }
 }
 
+class Skill {
+    state = {}
+    position = {}
+    curRender = {}
+    constructor(props) {
+        this.state = props.state
+        this.framesList = props.framesList
+    }
+    addPosition(params) {
+        const { x, y, z = 0, yRegression = 0 } = params;
+        if (!this.position.x) {
+            this.oldPosition = JSON.parse(JSON.stringify({ x, y, z, yRegression }))
+        } else {
+            this.oldPosition = JSON.parse(JSON.stringify(this.position))
+        }
+        this.position =  { x, y, z, yRegression }
+        return this;
+    }
+    resetFrameInfo(eventName) {
+        this.curRender.curEvent = this.curEvent
+        if (!this.resetCurRender) this.resetCurRender = JSON.parse(JSON.stringify(this.curRender))
+        this.initFrameInfo(eventName)
+    }
+    recoverFrameInfo() {
+        if (this.resetCurRender) {
+            this.curRender = this.resetCurRender
+            this.curEvent = this.resetCurRender.curEvent
+            delete this.resetCurRender
+        }
+    }
+    initFrameInfo(curEvent) {
+        this.curRender.curFrame = 0
+        this.curRender.curFrameImgIndex = 0
+        if (curEvent) {
+            this.curEvent = curEvent
+        }
+        return this
+    }
+    addFrameEndEvent(event) {
+        if (this.nextFrameEndEvent) {
+            this.nextFrameEndEvent.push(event)
+        } else {
+            this.nextFrameEndEvent = [event]
+        }
+    }
+    // 渲染逻辑 找到指定的某个图片 某一帧  渲染到canvas里
+    render() {
+        const { ctx, debug } = arguments[0]
+        let curRenderBother = null
+        if (this.curEvent && this.framesList[this.curEvent]) {
+            const frameList = this.framesList[this.curEvent]
+            let { curFrameImgIndex, curFrame } = this.curRender
+            // 命中当前行为 进行渲染
+            if (curFrame === frameList[curFrameImgIndex].frameStayTime) { // 动画行进到下一张
+                if (curFrameImgIndex === frameList.length - 1) { // 重复动画归0
+                    // 钩子 执行完动画后, 判断帧动画结束时间是否存在
+                    this.nextFrameEndEvent && this.nextFrameEndEvent.length && this.nextFrameEndEvent.shift()() // 帧动画结束事件
+                    this.curRender.curFrameImgIndex = 0
+                    this.curRender.curFrame = 0
+                } else {
+                    this.curRender.curFrameImgIndex++
+                    this.curRender.curFrame = 0
+                }
+            }
+            // 提取img resource
+            curRenderBother = frameList[curFrameImgIndex]
+            this.curRender.curFrame++
+        }
+        const Img = window.resources[curRenderBother.name]
+        const xywhs = getXYWHSByString(curRenderBother.volumeInfo)
+        const centerOriginxy = getCenterOriginByString(curRenderBother.centerOrigin)
+        const imgSize = getCenterOriginByString(curRenderBother.imgSizeInfo)
+        if (curRenderBother) {
+            this.curRender.curFrameInfo = curRenderBother
+            const { x, y } = this.position
+            let renderXInCanvas = Math.round(x - centerOriginxy.x)
+            let renderYInCanvas = Math.round(y - centerOriginxy.y)
+            ctx.drawImage(Img, 0, 0,imgSize.x, imgSize.y, renderXInCanvas, renderYInCanvas, imgSize.x, imgSize.y)
+
+            if (debug) {
+                // 体积描边
+                const borderData = getBulkBorder(this, xywhs, centerOriginxy, imgSize);
+                switch (this.curRender.curFrameInfo.shape) {
+                    case 'rectangle':
+                        drawPolygon({ ctx, color: 'blue' }, borderData);
+                        break;
+                    case 'circle':
+                        drawDot({ ctx }, borderData)
+                        break;
+                    default: () => { }
+                }
+                drawDot({ ctx, color: 'yellow' }, [this.position.x, this.position.y, 1] )
+            }
+        }
+        
+        return this
+    }
+    addAction(eventName, func, config) {
+        if (config.needTrigger) {
+            if (!this.trigger) {
+                this.trigger = []
+            }
+            this.trigger.push({
+                eventName,
+                codeDownTime: config.codeDownTime || 0,
+                curTime: 0, // 当前执行了多少次
+                ...config
+            })
+        }
+        this[eventName] = func.bind(this)
+        return this;
+    }
+    removeAction(eventName) {
+        this.trigger = this.trigger.filter(v => v.eventName !== eventName) || []
+        delete this[eventName]
+        return this;
+    }
+}
+
 /**
  * 向项目中添加本地图片资源
  */
@@ -382,8 +507,10 @@ class Role {
 const userNew = new Role(user)
 const monster_01_new = new Role(monster_02)
 const gameNew = new Game()
+window.skill_list = { skill_01 } 
 window.__game = gameNew
 window.__Role = Role
+window.__Skill = Skill
 
 addGameListener(gameNew)
 
@@ -400,7 +527,7 @@ startPollingImgStatus(() => {
     }, 1000);
 
     setTimeout(() => {
-        userNew.addPosition({ x: 100, y: 100, z: 0 }).addAction('action', walking, { needTrigger: true, codeDownTime: 0 })
+        userNew.addPosition({ x: 100, y: 100, z: 0 }).addAction('action', walking, { needTrigger: true, codeDownTime: 0 }).addAction('attackAction', attackAction, { needTrigger: true, codeDownTime: 0 })
         monster_01_new.addPosition({ x: 100, y: 200, z: 0 })
         .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0 })
         .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })

@@ -186,6 +186,21 @@ export const getCenterOriginByString = (str) => {
     }
 }
 
+/**
+ * 
+ * get skill position width hero stand
+ */
+export const getSkillPositionWidthHero = (hero, skillObject) => {
+    const { x, y } = hero.position
+    const direction = hero.curEvent.slice(0, 1)  // hero`s face to direction
+    console.log("============方向==========")
+    console.log(direction)
+    const [relative_x, relative_y] = skillObject.state.positionWidthHero[direction].split("_")
+    return {
+        x: x + Number(relative_x),
+        y: y + Number(relative_y)
+    }
+}
 
 /**
  * computed postion x1y1 and x2y2
