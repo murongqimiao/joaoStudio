@@ -117,7 +117,6 @@ class Game {
     addNewSkill(skillItem) {
         skillItem.currentId = this.currentRoleId++
         this.skillList.push(skillItem)
-        console.log("add new skill", this.skillList)
         skillItem.onSkillAdd && skillItem.onSkillAdd(this).bind(skillItem)
         this.updateAllRenderList()
         return this;
@@ -261,7 +260,9 @@ class Role {
     }
     resetFrameInfo(eventName) {
         this.curRender.curEvent = this.curEvent
-        if (!this.resetCurRender) this.resetCurRender = JSON.parse(JSON.stringify(this.curRender))
+        if (!this.resetCurRender) {
+            this.resetCurRender = JSON.parse(JSON.stringify(this.curRender))
+        }
         this.initFrameInfo(eventName)
     }
     recoverFrameInfo() {
@@ -377,6 +378,7 @@ class Skill {
     constructor(props) {
         this.state = props.state
         this.framesList = props.framesList
+        this.onCrash = props.onCrash || null
     }
     addPosition(params) {
         const { x, y, z = 0, yRegression = 0 } = params;
@@ -414,6 +416,7 @@ class Skill {
         } else {
             this.nextFrameEndEvent = [event]
         }
+        return this
     }
     // 渲染逻辑 找到指定的某个图片 某一帧  渲染到canvas里
     render() {

@@ -1,3 +1,5 @@
+import { getFaceToDirection } from "./utils/collisionDetection"
+
 /**
  * generate by cq resource
  */
@@ -209,7 +211,7 @@ export const user = {
         def: CONSTANT_COMMON.BASE_HERO_DEF,
         spd: CONSTANT_COMMON.BASE_MONSTER_SPD,
         isSolid: true,
-        isHero: true,
+        isMonster: true,
         volumeInfo: {
             shape: 'rectangle',
             width: 30,
@@ -239,7 +241,7 @@ export const user = {
         deathTime: 3,
         deathFrame: 5,
         hitTime: 2,
-        hitFrame: 5,
+        hitFrame: 10,
         skillTime: 6,
         skillFrame: 5,
         standTime: 3,
@@ -284,7 +286,7 @@ export const user = {
         def: CONSTANT_COMMON.BASE_HERO_DEF,
         spd: CONSTANT_COMMON.BASE_MONSTER_SPD,
         isSolid: true,
-        isHero: true,
+        isMonster: true,
         volumeInfo: {
             shape: 'rectangle',
             width: 30,
@@ -314,7 +316,7 @@ export const user = {
         deathTime: 3,
         deathFrame: 5,
         hitTime: 2,
-        hitFrame: 5,
+        hitFrame: 10,
         skillTime: 6,
         skillFrame: 5,
         standTime: 3,
@@ -362,12 +364,24 @@ export const skill_01 = {
         shape: 'rectangle'
     }),
     onSkillAdd: function() {
-        console.log("=======on skill add=======")
-        console.log(arguments)
     },
     onCrash: function() {
-        console.log("========on skill crash========")
-        console.log(arguments)
+        const [skillItem, crashItem, game] = arguments
+        if (
+            skillItem.curRender.curFrameImgIndex === 3
+            // skillItem.curRender.curFrame === 0 // when computed crash with  第5帧动画开始计算有效伤害
+        ) {
+            if (crashItem.state.isMonster) {
+                let direction = getFaceToDirection({
+                    x1: crashItem.position.x,
+                    y1: crashItem.position.y,
+                    x2: skillItem.position.x,
+                    y2: skillItem.position.y
+                })
+                crashItem.resetFrameInfo(`${direction}_hit`)
+                crashItem.addFrameEndEvent(crashItem.recoverFrameInfo.bind(crashItem))
+            }
+        }
     }
     
 }

@@ -27,7 +27,10 @@ export const monsterMainMind = function() {
         x2: limitDistance.position.x,
         y2: limitDistance.position.y
     })
-    if (limitDistance && limitDistance.distance && limitDistance.distance < 70) { // 攻击距离
+    if (monsterSelf.curEvent.includes('hit')) {
+        // 被击状态下什么都不能做
+        return
+    } else if (limitDistance && limitDistance.distance && limitDistance.distance < 70) { // 攻击距离
         // 执行攻击行为
         let event = direction + '_attack'
         tryEvent(event, monsterSelf)

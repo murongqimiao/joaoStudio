@@ -4,12 +4,9 @@ import { getSkillPositionWidthHero } from "./collisionDetection"
 export const attackAction = function (game, triggerInfo) {
     const { attackAim, onlyOnce } = triggerInfo
     if (this.curEvent.includes('attack') && this.curRender.curFrameImgIndex === 0 && this.curRender.curFrame === 1) { // 第n个动画 第一vf
-        console.log("==========exec attack action===========")
         let attackSkill = new window.__Skill(window.skill_list.skill_01) // 初始化一个技能对象, 放在合适的位置
         const { x, y } = getSkillPositionWidthHero(this, attackSkill)
         const heroDirection = this.curEvent.slice(0, 1)
-        console.log("==============attackSkill==========")
-        console.log(attackSkill)
         attackSkill
         .addPosition({ x, y, z: 0 })
         .initFrameInfo(`${heroDirection}_stand`)
@@ -36,6 +33,7 @@ export const attackAction = function (game, triggerInfo) {
         }
     }
 }
+
 
 const deadTimeReduce = function (game, triggerInfo) {
     const { attackUser } = triggerInfo;
