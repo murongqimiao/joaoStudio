@@ -50,6 +50,44 @@ export const CONSTANT_COMMON = {
     BASE_SKILL_HP: 1,
 }
 
+export const SYSTEM_INTERFACE_INFO_COMMON = {
+    BASE_BOARD: {
+        LEFT: 100,
+        TOP: 500,
+        IMG_WIDTH: 60,
+        IMG_HEIGHT: 60,
+        WIDTH: 100,
+        HEIGHT: 100,
+        FRAME_TIME: 0,
+        FRAME_STAY: 0,
+        IMG: () => `_systemInterface_blood_back1`
+    },
+    HP_INFO: {
+        PADDING_TOP: 40,
+        PADDING_BOTTOM: 80,
+        LEFT: 83,
+        TOP: 478,
+        IMG_WIDTH: 172,
+        IMG_HEIGHT: 244,
+        WIDTH: 115,
+        HEIGHT: 165,
+        FRAME_TIME: 18,
+        FRAME_STAY: 5,
+        IMG: (n) => `_systemInterface_hp_0_stand_${n}`,
+    },
+    MP_INFO: {
+        LEFT: 148,
+        TOP: 478,
+        IMG_WIDTH: 172,
+        IMG_HEIGHT: 244,
+        WIDTH: 115,
+        HEIGHT: 165,
+        FRAME_TIME: 18,
+        FRAME_STAY: 5,
+        IMG: (n) => `_systemInterface_mp_0_stand_${n}`,
+    },
+}
+
 // current available img
 const CONSTANT_IMG = {
     new_dco004: 'new_dco004',
@@ -139,6 +177,7 @@ export const user = {
         spd: CONSTANT_COMMON.BASE_HERO_SPD,
         isSolid: true,
         isHero: true,
+        maxHp:  CONSTANT_COMMON.BASE_HERO_HP,
         volumeInfo: {
             shape: 'rectangle',
             width: 30,

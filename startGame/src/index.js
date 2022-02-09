@@ -6,6 +6,7 @@ import { drawDot, drawPolygon } from "./utils/canvasTool"
 import { monsterMainMind } from "./utils/monsterAI"
 import { addGameListener } from "./utils/addGameListener"
 import { attackAction } from "./utils/skills"
+import { handleDrawInterface } from "./utils/systemInterface"
 
 class Game {
     monsterList = []
@@ -75,6 +76,9 @@ class Game {
         })
         // 打印FPS
         ctx.fillText(`FPS: ${this.gameFPS}`, 10, 10)
+
+        // handleInterfaceDraw
+        handleDrawInterface({ ctx, game: this })
 
         // 执行下一帧
         this.currentFrameIndexPerSeconde++
