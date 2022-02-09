@@ -1,5 +1,6 @@
 import { getDistancesWidth, getFaceToDirection, computedDistance } from "./collisionDetection"
 import { throwD6, throwD8, throwD12 } from "./random"
+import { attackEvent } from "./attackEvent"
 /**
  * monster mind
  * step1 find hero
@@ -27,9 +28,8 @@ export const monsterMainMind = function() {
         x2: limitDistance.position.x,
         y2: limitDistance.position.y
     })
-    if (monsterSelf.curEvent.includes('hit')) {
-        // 被击状态下什么都不能做
-        return
+    if (monsterSelf.curEvent.includes('hit') || monsterSelf.curEvent.includes('death')) {
+        // 被击 死亡 状态下什么都不能做
     } else if (limitDistance && limitDistance.distance && limitDistance.distance < 70) { // 攻击距离
         // 执行攻击行为
         let event = direction + '_attack'
@@ -87,7 +87,8 @@ const computedCodeDownTime = () => {
 
 const attackHero = function (game, triggerInfo) {
     const { attackAim } = triggerInfo
-    if (this.curEvent.includes('attack') && this.curRender.curFrameImgIndex === 2) {
+    if (this.curEvent.includes('death')) { return }
+    if (this.curEvent.includes('attack') && this.curRender.curFrameImgIndex === 2 && this.curRender.curFrame === 1) {
         if (computedDistance(this.position.x, this.position.y, attackAim.position.x, attackAim.position.y) < 70) {
             // 命中
             let direction = getFaceToDirection({
@@ -96,6 +97,7 @@ const attackHero = function (game, triggerInfo) {
                 x2: this.position.x,
                 y2: this.position.y
             })
+            attackEvent(this, attackAim, 'normal')
             attackAim.resetFrameInfo(`${direction}_hit`)
             attackAim.addFrameEndEvent(attackAim.recoverFrameInfo.bind(attackAim))
         } else {

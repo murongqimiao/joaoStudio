@@ -238,7 +238,7 @@ class Role {
         frameCount: 0,
     }
     constructor(props) {
-        this.state = props.role
+        this.state = JSON.parse(JSON.stringify(props.role))
         this.skill = props.skill
         this.onHeroAdd = props.onHeroAdd || null
         this.onMonsterAdd = props.onMonsterAdd || null
@@ -266,17 +266,19 @@ class Role {
         this.initFrameInfo(eventName)
     }
     recoverFrameInfo() {
-        if (this.resetCurRender) {
+        if (this.resetCurRender && !this.curRender.cantChangeEvent) {
             this.curRender = this.resetCurRender
             this.curEvent = this.resetCurRender.curEvent
             delete this.resetCurRender
         }
     }
     initFrameInfo(curEvent) {
-        this.curRender.curFrame = 0
-        this.curRender.curFrameImgIndex = 0
-        if (curEvent) {
-            this.curEvent = curEvent
+        if (!this.curRender.cantChangeEvent) {
+            this.curRender.curFrame = 0
+            this.curRender.curFrameImgIndex = 0
+            if (curEvent) {
+                this.curEvent = curEvent
+            }
         }
         return this;
     }
@@ -299,8 +301,10 @@ class Role {
                 if (curFrameImgIndex === frameList.length - 1) { // 重复动画归0
                     // 钩子 执行完动画后, 判断帧动画结束时间是否存在
                     this.nextFrameEndEvent && this.nextFrameEndEvent.length && this.nextFrameEndEvent.shift()() // 帧动画结束事件
-                    this.curRender.curFrameImgIndex = 0
-                    this.curRender.curFrame = 0
+                    if (!this.curRender.cantChangeEvent) {
+                        this.curRender.curFrameImgIndex = 0
+                        this.curRender.curFrame = 0
+                    }
                 } else {
                     this.curRender.curFrameImgIndex++
                     this.curRender.curFrame = 0
@@ -368,6 +372,11 @@ class Role {
             }
         }
         return this
+    }
+    Death() {
+        let direction = this.curEvent.slice(0, 1)
+        this.curEvent = `${direction}_death`
+        this.curRender.cantChangeEvent = true
     }
 }
 

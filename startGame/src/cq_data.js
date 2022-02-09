@@ -1,4 +1,5 @@
 import { getFaceToDirection } from "./utils/collisionDetection"
+import { attackEvent } from "./utils/attackEvent"
 
 /**
  * generate by cq resource
@@ -238,7 +239,7 @@ export const user = {
         type: 'monster',
         attackTime: 5,
         attackFrame: 5,
-        deathTime: 3,
+        deathTime: 4,
         deathFrame: 5,
         hitTime: 2,
         hitFrame: 10,
@@ -313,7 +314,7 @@ export const user = {
         type: 'monster',
         attackTime: 5,
         attackFrame: 10,
-        deathTime: 3,
+        deathTime: 7,
         deathFrame: 5,
         hitTime: 2,
         hitFrame: 10,
@@ -351,7 +352,8 @@ export const user = {
 export const skill_01 = {
     state: {
         name: CONSTANT_IMG.new_jn10020,
-        positionWidthHero: CONSTANT_COMMON.SKILL_POSITION.skill_01
+        positionWidthHero: CONSTANT_COMMON.SKILL_POSITION.skill_01,
+        atk: CONSTANT_COMMON.BASE_HERO_ATK
     },
     framesList: generateFrameList({
         name: CONSTANT_IMG.new_jn10020,
@@ -378,6 +380,10 @@ export const skill_01 = {
                     x2: skillItem.position.x,
                     y2: skillItem.position.y
                 })
+
+                // exec attack action
+                if (crashItem.curEvent.includes('death')) { return }
+                attackEvent(skillItem, crashItem, 'normal')
                 crashItem.resetFrameInfo(`${direction}_hit`)
                 crashItem.addFrameEndEvent(crashItem.recoverFrameInfo.bind(crashItem))
             }
@@ -394,6 +400,9 @@ export const skill_01 = {
     const that = this
     const { spd } = this.state;
     if (this.curEvent.includes('hit')) { // hit 状态下不能进行任何操作
+        return
+    }
+    if (this.curEvent.includes('death')) { // death 状态下不能进行任何操作
         return
     }
     
