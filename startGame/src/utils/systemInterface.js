@@ -12,7 +12,6 @@ export const drawBloodAndMagic = function ({ ctx, game }) {
                 if (hp >= 0) {
                     const reduce = ((maxHp - hp) / maxHp)
                     const reduceDisdances = (waitForDrawInfo.IMG_HEIGHT - (waitForDrawInfo.PADDING_TOP + waitForDrawInfo.PADDING_BOTTOM)) * reduce + waitForDrawInfo.PADDING_TOP
-                    console.log(reduceDisdances)
                     waitForDrawInfo.IMG_HEIGHT_FROM = reduceDisdances 
                     waitForDrawInfo._top = waitForDrawInfo.TOP + reduceDisdances *(waitForDrawInfo.HEIGHT / waitForDrawInfo.IMG_HEIGHT)
                 }

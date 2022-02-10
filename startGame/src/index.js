@@ -7,6 +7,8 @@ import { monsterMainMind } from "./utils/monsterAI"
 import { addGameListener } from "./utils/addGameListener"
 import { attackAction } from "./utils/skills"
 import { handleDrawInterface } from "./utils/systemInterface"
+import { drawMap } from "./utils/drawMap"
+import { getMainViewportPostion, moveViewportWhenHeroWalk } from "./utils/positionReset"
 
 class Game {
     monsterList = []
@@ -20,6 +22,25 @@ class Game {
     debug = 1
     currentFrameIndexPerSeconde = 0
     gameFPS = 60
+    mainViewportPosition = {
+        height: 600, // 视口高 canvas
+        width: 1000,
+        cavnasId: 'canvas',
+        leftDistances: 1500, // distances from map left
+        topDistances: 1500,
+        marginLeft: 100,
+        marginTop: 150,
+        marginRight: 100,
+        marginBottom: 150,
+        map: '_map_10321',
+        scale: 1
+    }
+    actionViewPortPosition = {
+        paddingLeft: 0,
+        paddingTop: 0,
+        paddingRight: 0,
+        paddingBottom: 0,
+    }
     constructor(props) {
 
     }
@@ -62,6 +83,12 @@ class Game {
             }
             if (v.delete) { needUpdate = true }
         })
+
+        // 计算边界行走行为
+        let curHero = this.heroList.filter(v => v.state.isHero)[0]
+        if (curHero) { moveViewportWhenHeroWalk(curHero.position) }
+
+        
         if (needUpdate) {
             this.updateAllRenderList()
         }
@@ -70,6 +97,10 @@ class Game {
         var c = document.getElementById('canvas');
         var ctx = c.getContext("2d");
         ctx.clearRect(0, 0, c.width, c.height)
+
+        // 绘制地图
+        drawMap({ ctx, mainViewportPosition: this.mainViewportPosition })
+
         this.filterRenderListByPositionY()
         this.allRenderList.forEach(v => {
             v.render && v.render({ ctx, debug: this.debug })
@@ -90,6 +121,10 @@ class Game {
     getFPS() {
         this.gameFPS = this.currentFrameIndexPerSeconde
         this.currentFrameIndexPerSeconde = 0
+    }
+
+    resetMainViewportPosition(params) {
+        this.mainViewportPosition = Object.assign({}, this.mainViewportPosition, params || {})
     }
 
     start() {
@@ -324,7 +359,9 @@ class Role {
         const imgSize = getCenterOriginByString(curRenderBother.imgSizeInfo)
         if (curRenderBother) {
             this.curRender.curFrameInfo = curRenderBother
-            const { x, y } = this.position
+            
+            const { x, y } = getMainViewportPostion(this.position)
+
             let renderXInCanvas = Math.round(x - centerOriginxy.x)
             let renderYInCanvas = Math.round(y - centerOriginxy.y)
             ctx.drawImage(Img, 0, 0,imgSize.x, imgSize.y, renderXInCanvas, renderYInCanvas, imgSize.x, imgSize.y)
@@ -341,7 +378,7 @@ class Role {
                         break;
                     default: () => { }
                 }
-                drawDot({ ctx, color: 'yellow' }, [this.position.x, this.position.y, 1] )
+                drawDot({ ctx, color: 'yellow' }, [getMainViewportPostion(this.position).x, getMainViewportPostion(this.position).y, 1] )
             }
         }
       
@@ -543,17 +580,19 @@ startPollingImgStatus(() => {
     }, 1000);
 
     setTimeout(() => {
-        userNew.addPosition({ x: 100, y: 100, z: 0 }).addAction('action', walking, { needTrigger: true, codeDownTime: 0 }).addAction('attackAction', attackAction, { needTrigger: true, codeDownTime: 0 })
-        monster_01_new.addPosition({ x: 100, y: 200, z: 0 })
+        gameNew.resetMainViewportPosition()
+        userNew.addPosition({ x: 1500 + 200, y: 1500 + 200, z: 0 }).addAction('action', walking, { needTrigger: true, codeDownTime: 0 }).addAction('attackAction', attackAction, { needTrigger: true, codeDownTime: 0 })
+        monster_01_new.addPosition({ x: 1500 + 100, y: 1500 + 200, z: 0 })
         .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0 })
         .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
         gameNew.addNewHero(userNew).addNewMonster(monster_01_new)
+        
     }, 2000);
 
     setInterval(() => {
         gameNew.addNewMonster(
             new Role(Math.random() > 0.5 ? monster_01 : monster_02)
-            .addPosition({ x: Math.random()*500, y: Math.random() * 500, z: 0 })
+            .addPosition({ x: 1500 + Math.random()*500, y: 1500 + Math.random() * 500, z: 0 })
             .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0})
             .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
         )

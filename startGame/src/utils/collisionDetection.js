@@ -1,3 +1,4 @@
+import { getMainViewportPostion } from "./positionReset"
 /**
  * collision detection
  * rectAngle
@@ -36,7 +37,7 @@ export const collisionDetection = (objectA, objectB) => {
  * @returns 
  */
 export const getBulkBorder = (bulk, xywhs, centerOriginxy, imgSize) => {
-    const { x, y } = bulk.position
+    const { x, y } = getMainViewportPostion(bulk.position)
     if (!xywhs) { xywhs = getXYWHSByString(bulk.curRender.curFrameInfo.volumeInfo) }
     if (!centerOriginxy) { centerOriginxy = getCenterOriginByString(bulk.curRender.curFrameInfo.centerOrigin) }
     if (!imgSize) { imgSize = getCenterOriginByString(bulk.curRender.curFrameInfo.imgSizeInfo) }
