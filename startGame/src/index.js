@@ -23,17 +23,17 @@ class Game {
     currentFrameIndexPerSeconde = 0
     gameFPS = 60
     mainViewportPosition = {
-        height: 600, // 视口高 canvas
-        width: 1000,
+        height: 500, // 视口高 canvas
+        width: 800,
         cavnasId: 'canvas',
-        leftDistances: 1500, // distances from map left
-        topDistances: 1500,
+        leftDistances: 1000, // distances from map left
+        topDistances: 500,
         marginLeft: 100,
         marginTop: 150,
         marginRight: 100,
         marginBottom: 150,
-        map: '_map_10321',
-        scale: 1
+        map: '_map_10023',
+        scale: 0.5
     }
     actionViewPortPosition = {
         paddingLeft: 0,
@@ -581,8 +581,8 @@ startPollingImgStatus(() => {
 
     setTimeout(() => {
         gameNew.resetMainViewportPosition()
-        userNew.addPosition({ x: 1500 + 200, y: 1500 + 200, z: 0 }).addAction('action', walking, { needTrigger: true, codeDownTime: 0 }).addAction('attackAction', attackAction, { needTrigger: true, codeDownTime: 0 })
-        monster_01_new.addPosition({ x: 1500 + 100, y: 1500 + 200, z: 0 })
+        userNew.addPosition({ x: 1000 + 200, y: 500 + 200, z: 0 }).addAction('action', walking, { needTrigger: true, codeDownTime: 0 }).addAction('attackAction', attackAction, { needTrigger: true, codeDownTime: 0 })
+        monster_01_new.addPosition({ x: 1000 + 100, y: 500 + 200, z: 0 })
         .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0 })
         .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
         gameNew.addNewHero(userNew).addNewMonster(monster_01_new)
@@ -592,7 +592,7 @@ startPollingImgStatus(() => {
     setInterval(() => {
         gameNew.addNewMonster(
             new Role(Math.random() > 0.5 ? monster_01 : monster_02)
-            .addPosition({ x: 1500 + Math.random()*500, y: 1500 + Math.random() * 500, z: 0 })
+            .addPosition({ x: 1000 + Math.random()*500, y: 500 + Math.random() * 500, z: 0 })
             .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0})
             .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
         )
