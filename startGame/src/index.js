@@ -1,13 +1,13 @@
 // import { footMan, Monster01, goldCoinInMap, walking, getImageFromX_Y, CONSTANT_COMMON } from "./data"
-import { monster_01, monster_02, user, walking, monsterEventHandler, skill_01 } from "./cq_data"
+import { monster_01, monster_02, user, walking, monsterEventHandler, skill_01, MAP_REMORA } from "./cq_data"
 import { collisionDetection, getBulkBorder, getXYWHSByString, getCenterOriginByString } from "./utils/collisionDetection"
-import { startPollingImgStatus } from "./utils/checkResourceLoad"
+import { loadInitResources } from "./utils/checkResourceLoad"
 import { drawDot, drawPolygon } from "./utils/canvasTool"
 import { monsterMainMind } from "./utils/monsterAI"
 import { addGameListener } from "./utils/addGameListener"
 import { attackAction } from "./utils/skills"
 import { handleDrawInterface } from "./utils/systemInterface"
-import { drawMap } from "./utils/drawMap"
+import { drawMap, checkPointInMap } from "./utils/drawMap"
 import { getMainViewportPostion, moveViewportWhenHeroWalk } from "./utils/positionReset"
 
 class Game {
@@ -22,9 +22,12 @@ class Game {
     debug = 1
     currentFrameIndexPerSeconde = 0
     gameFPS = 60
+    gameStatus = {
+        loading: false
+    }
     mainViewportPosition = {
-        height: 500, // 视口高 canvas
-        width: 800,
+        height: 600, // 视口高 canvas
+        width: 1024,
         cavnasId: 'canvas',
         leftDistances: 1000, // distances from map left
         topDistances: 500,
@@ -46,6 +49,14 @@ class Game {
     }
 
     run() {
+        var c = document.getElementById('canvas');
+        var ctx = c.getContext("2d");
+        // 执行render
+        ctx.clearRect(0, 0, c.width, c.height)
+
+        // 绘制地图
+        drawMap({ ctx, mainViewportPosition: this.mainViewportPosition })
+
         // 执行行为
         let needUpdate = false
         this.allRenderList.forEach((v, index) => {
@@ -79,6 +90,24 @@ class Game {
                         }
                         delete v.oldPosition
                     }
+
+                    // 检测地图障碍物
+                    const mapRule = MAP_REMORA[this.mainViewportPosition.map]
+                    if (mapRule) {
+                        let checkResult = mapRule.map(mapRuleItem => {
+                            if (this.debug) {
+                                drawPolygon({ ctx, color: 'green' }, mapRuleItem.polygonPoints.map(([_polygonP_x, _polygonP_y]) => [(_polygonP_x - this.mainViewportPosition.leftDistances) * this.mainViewportPosition.scale, (_polygonP_y - this.mainViewportPosition.topDistances) * this.mainViewportPosition.scale]).join(",").split(",").map(_drawI => Number(_drawI)))
+                            }
+                            return checkPointInMap(mapRuleItem.polygonPoints, { x: v.position.x, y: v.position.y  }, mapRuleItem.type)
+                        })
+                        // console.log("=============checkResult=============")
+                        // console.log( checkResult, v.position.x, v.position.y, this.mainViewportPosition.leftDistances, this.mainViewportPosition.topDistances, this.actionViewPortPosition.paddingLeft, this.actionViewPortPosition.paddingTop)
+                        if (v.oldPosition && checkResult.some(v => v === false)) {
+                            // 碰撞到障碍物或者不在规定区域
+                            v.position = JSON.parse(JSON.stringify(v.oldPosition))
+                            delete v.oldPosition
+                        }
+                    }
                 })
             }
             if (v.delete) { needUpdate = true }
@@ -93,13 +122,7 @@ class Game {
             this.updateAllRenderList()
         }
 
-        // 执行render
-        var c = document.getElementById('canvas');
-        var ctx = c.getContext("2d");
-        ctx.clearRect(0, 0, c.width, c.height)
 
-        // 绘制地图
-        drawMap({ ctx, mainViewportPosition: this.mainViewportPosition })
 
         this.filterRenderListByPositionY()
         this.allRenderList.forEach(v => {
@@ -542,20 +565,7 @@ class Skill {
     }
 }
 
-/**
- * 向项目中添加本地图片资源
- */
- console.log("============require.context")
- let files = require.context("./assets", true, /\.png/)
- let filesPaths = files.keys()
- filesPaths.forEach(v => {
-     let _img = new Image()
-     _img.src = "./assets/" + v
-     _img.onload = () => {
-        window.resources = Object.assign({}, (window.resources || {}), { [`${v.replaceAll('png', '').replaceAll('.', '').replaceAll('/', '_')}`]: _img })
-     }
-     
- })
+
 
 const userNew = new Role(user)
 const monster_01_new = new Role(monster_02)
@@ -573,7 +583,7 @@ addGameListener(gameNew)
  * 判断图片资源加载状态
  */
 const that = this;
-startPollingImgStatus(() => {
+loadInitResources(() => {
     gameNew.start()
     setInterval(() => {
         gameNew.getFPS()
@@ -582,21 +592,22 @@ startPollingImgStatus(() => {
     setTimeout(() => {
         gameNew.resetMainViewportPosition()
         userNew.addPosition({ x: 1000 + 200, y: 500 + 200, z: 0 }).addAction('action', walking, { needTrigger: true, codeDownTime: 0 }).addAction('attackAction', attackAction, { needTrigger: true, codeDownTime: 0 })
-        monster_01_new.addPosition({ x: 1000 + 100, y: 500 + 200, z: 0 })
-        .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0 })
-        .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
-        gameNew.addNewHero(userNew).addNewMonster(monster_01_new)
+        // monster_01_new.addPosition({ x: 1000 + 100, y: 500 + 200, z: 0 })
+        // .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0 })
+        // .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
+        // gameNew.addNewHero(userNew).addNewMonster(monster_01_new)
+        gameNew.addNewHero(userNew)
         
     }, 2000);
 
-    setInterval(() => {
-        gameNew.addNewMonster(
-            new Role(Math.random() > 0.5 ? monster_01 : monster_02)
-            .addPosition({ x: 1000 + Math.random()*500, y: 500 + Math.random() * 500, z: 0 })
-            .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0})
-            .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
-        )
-    }, 9900);
+    // setInterval(() => {
+    //     gameNew.addNewMonster(
+    //         new Role(Math.random() > 0.5 ? monster_01 : monster_02)
+    //         .addPosition({ x: 1000 + Math.random()*500, y: 500 + Math.random() * 500, z: 0 })
+    //         .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0})
+    //         .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
+    //     )
+    // }, 9900);
 
 })
 

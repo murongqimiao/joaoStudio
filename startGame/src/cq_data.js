@@ -97,6 +97,24 @@ const CONSTANT_IMG = {
     new_jn10020: 'new_jn10020'
 }
 
+export const MAP_REMORA = {
+   '_map_10023': [{
+       polygonPoints: [
+           [252, 889],
+           [225, 996],
+           [810, 1251],
+           [1980, 670],
+           [1390, 379],
+           [1285, 361],
+           [963, 523],
+           [932, 655],
+           [783, 738],
+           [538, 739]
+        ],
+       type: 'in'
+   }] 
+}
+
 /**
  * generate frame list by params 
  * @param {*} params

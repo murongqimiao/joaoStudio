@@ -1,19 +1,6 @@
 /**
- * check all imgs loaded in window
- * return percent of img loaded
+ * check imgs load status 
  */
-const getImgsLoadStatus = () => {
-    let imgNumber = document.querySelectorAll('img').length
-    const imgListLoadStatus = []
-
-    while (imgNumber > 0) {
-        imgListLoadStatus.push(document.querySelectorAll('img')[imgNumber - 1].complete)
-        document.querySelectorAll('img')[imgNumber]
-        imgNumber--
-    }
-    const imgLoadedNumber = imgListLoadStatus.filter(v => v).length
-    return imgLoadedNumber * 100 / imgListLoadStatus.length
-}
 
 const renderLoadStatusInWindow = (percent) => {
     const el = document.querySelector('#load-status')
@@ -26,19 +13,48 @@ const removeLoadStatusInWindow = () => {
     el.parentElement.removeChild(el)
 }
 
-export const startPollingImgStatus = (cb) => {
-
-    let checkImgLoadStatus = setInterval(() => {
-        let loadResult = getImgsLoadStatus()
-        renderLoadStatusInWindow(loadResult)
-        if (loadResult === 100) {
-            // load success
-            clearInterval(checkImgLoadStatus)
-            cb && cb()
-            setTimeout(() => {
-                removeLoadStatusInWindow()
-            }, 1500);
-        }
-    }, 300);
-
+export const loadInitResources = (cb) => {
+    /**
+     * 向项目中添加本地图片资源
+     */
+    let files = require.context("../assets", true, /\.png/)
+    let filesPaths = files.keys()
+    loadImgs(filesPaths, cb)
 }
+
+const loadImgs = (imgList, completeFunc) => {
+    const game = window.__game
+    const currentLoadImgs = {}
+    let maxNumber = null
+    let currentLoadNumber = 0
+
+    game.gameStatus.loading = true // start loading modal
+
+    // start load img
+    imgList.forEach(v => {
+        let _img = new Image()
+        _img.src = "./assets/" + v
+        currentLoadImgs[_img.src] = 0
+        _img.onload = () => {
+            currentLoadImgs[_img.src] = 1
+            maxNumber = Object.keys(currentLoadImgs).length
+            currentLoadNumber = Object.keys(currentLoadImgs).map(v => currentLoadImgs[v]).filter(v => v).length
+
+            window.resources = Object.assign({}, (window.resources || {}), { [`${v.replaceAll('png', '').replaceAll('.', '').replaceAll('/', '_')}`]: _img })
+            
+            // update loading status
+            game.gameStatus.waitForLoad = maxNumber // total imgs
+            game.gameStatus.loadImgs = currentLoadNumber // has load imgs
+            renderLoadStatusInWindow(currentLoadNumber/maxNumber)
+
+            // load complete
+            if (maxNumber === currentLoadNumber) {
+                removeLoadStatusInWindow()
+                game.gameStatus.loading = false
+                completeFunc()
+            }
+        }
+    })
+}
+
+
