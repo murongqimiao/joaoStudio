@@ -2,7 +2,7 @@ export const drawMap = function ({ ctx, mainViewportPosition }) {
     const { map, leftDistances, topDistances, height, width, scale } = mainViewportPosition
     let _map = window.resources[map]
     if (map && _map) {
-        ctx.drawImage(_map, leftDistances, topDistances, width / scale, height / scale, 0, 0, width, height)
+        ctx.drawImage(_map, leftDistances / scale, topDistances / scale, width / scale, height / scale, 0, 0, width, height)
     }
 }
 
@@ -21,10 +21,10 @@ export const checkPointInMap = function(points = [], position = { x: 0, y: 0}, t
     instersect = instersect.map(v => checkPointOnTheLineSegmentCreatByTwoPoints(v))
     if (type === 'in') {
         // 点在多边形内部则交点个数为奇数
-        return instersect.filter(v => v).length % 2 === 0
+        return instersect.filter(v => v).length % 2 === 1
     } else {
         // 点在多边形外部则焦点个数为偶数
-        return instersect.filter(v => v).length % 2 === 1
+        return instersect.filter(v => v).length % 2 === 0
     }
 }
 
@@ -34,7 +34,6 @@ export const checkPointInMap = function(points = [], position = { x: 0, y: 0}, t
  */
 const checkPointOnTheLineSegmentCreatByTwoPoints = function([x1, y1, x2, y2, x, y]) {
     // step1 检测起点在上或者下
-    // console.log([x1, y1, x2, y2, x, y])
     const p1IsTop = (y1 === Math.max(y1, y2))
     if (p1IsTop && (y > y1 || y <= y2)) {
         return false

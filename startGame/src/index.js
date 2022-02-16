@@ -2,7 +2,7 @@
 import { monster_01, monster_02, user, walking, monsterEventHandler, skill_01, MAP_REMORA } from "./cq_data"
 import { collisionDetection, getBulkBorder, getXYWHSByString, getCenterOriginByString } from "./utils/collisionDetection"
 import { loadInitResources } from "./utils/checkResourceLoad"
-import { drawDot, drawPolygon } from "./utils/canvasTool"
+import { drawDot, drawPolygon, scalePoints, regressOrigin, flatArr } from "./utils/canvasTool"
 import { monsterMainMind } from "./utils/monsterAI"
 import { addGameListener } from "./utils/addGameListener"
 import { attackAction } from "./utils/skills"
@@ -29,8 +29,8 @@ class Game {
         height: 600, // 视口高 canvas
         width: 1024,
         cavnasId: 'canvas',
-        leftDistances: 1000, // distances from map left
-        topDistances: 500,
+        leftDistances: 200, // distances from map left
+        topDistances: 100,
         marginLeft: 100,
         marginTop: 150,
         marginRight: 100,
@@ -95,13 +95,14 @@ class Game {
                     const mapRule = MAP_REMORA[this.mainViewportPosition.map]
                     if (mapRule) {
                         let checkResult = mapRule.map(mapRuleItem => {
+                            let _scaledPoints = scalePoints(mapRuleItem.polygonPoints, this.mainViewportPosition.scale) // 缩放map坐标体系
+                            let _regressedOriginPoints = regressOrigin(_scaledPoints, this.mainViewportPosition.leftDistances, this.mainViewportPosition.topDistances) // 回归canvas 坐标体系
+                            let _flatPoints = flatArr(_regressedOriginPoints)
                             if (this.debug) {
-                                drawPolygon({ ctx, color: 'green' }, mapRuleItem.polygonPoints.map(([_polygonP_x, _polygonP_y]) => [(_polygonP_x - this.mainViewportPosition.leftDistances) * this.mainViewportPosition.scale, (_polygonP_y - this.mainViewportPosition.topDistances) * this.mainViewportPosition.scale]).join(",").split(",").map(_drawI => Number(_drawI)))
+                                drawPolygon({ ctx, color: 'green' }, _flatPoints)
                             }
-                            return checkPointInMap(mapRuleItem.polygonPoints, { x: v.position.x, y: v.position.y  }, mapRuleItem.type)
+                            return checkPointInMap(_scaledPoints, { x: v.position.x, y: v.position.y  }, mapRuleItem.type)
                         })
-                        // console.log("=============checkResult=============")
-                        // console.log( checkResult, v.position.x, v.position.y, this.mainViewportPosition.leftDistances, this.mainViewportPosition.topDistances, this.actionViewPortPosition.paddingLeft, this.actionViewPortPosition.paddingTop)
                         if (v.oldPosition && checkResult.some(v => v === false)) {
                             // 碰撞到障碍物或者不在规定区域
                             v.position = JSON.parse(JSON.stringify(v.oldPosition))
@@ -591,7 +592,7 @@ loadInitResources(() => {
 
     setTimeout(() => {
         gameNew.resetMainViewportPosition()
-        userNew.addPosition({ x: 1000 + 200, y: 500 + 200, z: 0 }).addAction('action', walking, { needTrigger: true, codeDownTime: 0 }).addAction('attackAction', attackAction, { needTrigger: true, codeDownTime: 0 })
+        userNew.addPosition({ x: 200 + 200, y: 200 + 200, z: 0 }).addAction('action', walking, { needTrigger: true, codeDownTime: 0 }).addAction('attackAction', attackAction, { needTrigger: true, codeDownTime: 0 })
         // monster_01_new.addPosition({ x: 1000 + 100, y: 500 + 200, z: 0 })
         // .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0 })
         // .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })

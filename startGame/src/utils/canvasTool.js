@@ -39,4 +39,31 @@ export const drawPolygon = ({ ctx, color = 'red', width = 1 }, pointSet) => {
         console.log("err pointSet is odd", pointSet)
     }
 }
+
+/**
+ * scale the points arr
+ * arr = [[1,2], [3,4], [5,6]]
+ * scale 0.5
+ * result = [0.5, 1, 1.5, 2, 2.5, 3]
+ */
+export const scalePoints = (arr, scale) => {
+    return arr.map(v => v.map(k => k * scale))
+}
     
+/**
+ * regress origin
+ * @params [[2,4], [6,8]], left 1. top 2
+ * retuslt = [[1,2], [5,6]]
+ */
+export const regressOrigin = function (points, left, top) {
+   return points.map((item) => item.map((v, index) => index % 2 === 0 ? v - left : v - top))
+}
+
+/**
+ * flat arr
+ * @params arr = [[1,2], [3,4], [5,6]]
+ * result [1,2,3,4,5,6]
+ */
+export const flatArr = function (arr) {
+    return arr.join(",").split(",").map(i => Number(i))
+}
