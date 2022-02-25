@@ -1,13 +1,13 @@
 // import { footMan, Monster01, goldCoinInMap, walking, getImageFromX_Y, CONSTANT_COMMON } from "./data"
-import { monster_01, monster_02, user, walking, monsterEventHandler, skill_01, MAP_REMORA } from "./cq_data"
+import { monster_01, monster_02, user, walking, monsterEventHandler, skill_01, MAP_REMORA, createName } from "./cq_data"
 import { collisionDetection, getBulkBorder, getXYWHSByString, getCenterOriginByString } from "./utils/collisionDetection"
 import { loadInitResources } from "./utils/checkResourceLoad"
 import { drawDot, drawPolygon, scalePoints, regressOrigin, flatArr } from "./utils/canvasTool"
 import { monsterMainMind } from "./utils/monsterAI"
 import { addGameListener } from "./utils/addGameListener"
 import { attackAction } from "./utils/skills"
-import { handleDrawInterface } from "./utils/systemInterface"
-import { drawMap, checkPointInMap } from "./utils/drawMap"
+import { handleDrawInterface, startDrawInfo } from "./utils/systemInterface"
+import { drawMap, checkPointInMap, checkMapRemora } from "./utils/drawMap"
 import { getMainViewportPostion, moveViewportWhenHeroWalk } from "./utils/positionReset"
 
 class Game {
@@ -26,7 +26,7 @@ class Game {
         loading: false
     }
     mainViewportPosition = {
-        height: 600, // 视口高 canvas
+        height: 650, // 视口高 canvas
         width: 1024,
         cavnasId: 'canvas',
         leftDistances: 200, // distances from map left
@@ -53,7 +53,7 @@ class Game {
         var ctx = c.getContext("2d");
         // 执行render
         ctx.clearRect(0, 0, c.width, c.height)
-
+        const that = this;
         // 绘制地图
         drawMap({ ctx, mainViewportPosition: this.mainViewportPosition })
 
@@ -91,30 +91,26 @@ class Game {
                         delete v.oldPosition
                     }
 
-                    // 检测地图障碍物
+                    // 检测地图障碍物 mapRule [], collisionCallBack, passCallBack
                     const mapRule = MAP_REMORA[this.mainViewportPosition.map]
                     if (mapRule) {
-                        let checkResult = mapRule.map(mapRuleItem => {
-                            let _scaledPoints = scalePoints(mapRuleItem.polygonPoints, this.mainViewportPosition.scale) // 缩放map坐标体系
-                            let _regressedOriginPoints = regressOrigin(_scaledPoints, this.mainViewportPosition.leftDistances, this.mainViewportPosition.topDistances) // 回归canvas 坐标体系
-                            let _flatPoints = flatArr(_regressedOriginPoints)
-                            if (this.debug) {
-                                drawPolygon({ ctx, color: 'green' }, _flatPoints)
-                            }
-                            return checkPointInMap(_scaledPoints, { x: v.position.x, y: v.position.y  }, mapRuleItem.type)
-                        })
-                        if (v.oldPosition && checkResult.some(v => v === false)) {
-                            // 碰撞到障碍物或者不在规定区域
-                            v.position = JSON.parse(JSON.stringify(v.oldPosition))
-                            delete v.oldPosition
-                        }
+                        let _checkMapRemora = checkMapRemora.bind(this)
+                        _checkMapRemora(mapRule,
+                            v,
+                            () => {
+                                v.position = JSON.parse(JSON.stringify(v.oldPosition))
+                                delete v.oldPosition
+                            },
+                            () => {},
+                            ctx
+                        )
                     }
                 })
             }
             if (v.delete) { needUpdate = true }
         })
 
-        // 计算边界行走行为
+        // 计算边界行走行为, 移动视口区域
         let curHero = this.heroList.filter(v => v.state.isHero)[0]
         if (curHero) { moveViewportWhenHeroWalk(curHero.position) }
 
@@ -124,15 +120,21 @@ class Game {
         }
 
 
-
+        // 计算render的层级顺序
         this.filterRenderListByPositionY()
+
+        // 执行render行为
         this.allRenderList.forEach(v => {
             v.render && v.render({ ctx, debug: this.debug })
         })
         // 打印FPS
-        ctx.fillText(`FPS: ${this.gameFPS}`, 10, 10)
+        ctx.font = '20px Arial'
+        ctx.fillStyle = '#fff'
+        let FPSText = 'FPS:  ' + that.gameFPS
+        ctx.direction = 'ltr'
+        ctx.fillText(FPSText, 10, 20)
 
-        // handleInterfaceDraw
+        // 绘制系统界面
         handleDrawInterface({ ctx, game: this })
 
         // 执行下一帧
@@ -145,6 +147,7 @@ class Game {
     getFPS() {
         this.gameFPS = this.currentFrameIndexPerSeconde
         this.currentFrameIndexPerSeconde = 0
+        return this
     }
 
     resetMainViewportPosition(params) {
@@ -161,19 +164,49 @@ class Game {
 
     addNewMonster(monster) {
         monster.currentId = this.currentRoleId++
-        this.monsterList.push(monster)
-        console.log("addNewMonster,", this.monsterList)
-        monster.onMonsterAdd && this.onMonsterAdd(monster)
-        this.updateAllRenderList()
+        // 检测地图障碍物 mapRule [], collisionCallBack, passCallBack
+        const mapRule = MAP_REMORA[this.mainViewportPosition.map]
+        let positionAvailable = true
+        if (mapRule) {
+            let _checkMapRemora = checkMapRemora.bind(this)
+            _checkMapRemora(mapRule,
+                monster,
+                () => { positionAvailable = false },
+            )
+        }
+        if (positionAvailable) {
+            this.monsterList.push(monster)
+            console.log("addNewMonster,", this.monsterList)
+            monster.onMonsterAdd && this.onMonsterAdd(monster)
+            this.updateAllRenderList()
+        } else {
+            console.log('=============err==========')
+            console.error('add new monster fail, new monster position not available')
+        }
         return this;
     }
 
     addNewHero(hero) {
         hero.currentId = this.currentRoleId++
-        this.heroList.push(hero)
-        console.log("diyici add new hero,", this.heroList)
-        hero.onHeroAdd && this.onHeroAdd(hero)
-        this.updateAllRenderList()
+        // 检测地图障碍物 mapRule [], collisionCallBack, passCallBack
+        const mapRule = MAP_REMORA[this.mainViewportPosition.map]
+        let positionAvailable = true
+        if (mapRule) {
+            let _checkMapRemora = checkMapRemora.bind(this)
+            _checkMapRemora(mapRule,
+                hero,
+                () => { positionAvailable = false },
+            )
+        }
+        if (positionAvailable) {
+            console.log("===========add success=========")
+            this.heroList.push(hero)
+            hero.onHeroAdd && this.onHeroAdd(hero)
+            this.updateAllRenderList()
+        } else {
+            console.log("=========err==========")
+            console.error("position is not available")
+        }
         return this;
     }
 
@@ -300,6 +333,7 @@ class Role {
         curFrame: 0,
         frameCount: 0,
     }
+    extraRenderList = []
     constructor(props) {
         this.state = JSON.parse(JSON.stringify(props.role))
         this.skill = props.skill
@@ -322,6 +356,7 @@ class Role {
         return this;
     }
     resetFrameInfo(eventName) {
+        if (this.curRender.cantChangeEvent) return
         this.curRender.curEvent = this.curEvent
         if (!this.resetCurRender) {
             this.resetCurRender = JSON.parse(JSON.stringify(this.curRender))
@@ -405,6 +440,10 @@ class Role {
                 drawDot({ ctx, color: 'yellow' }, [getMainViewportPostion(this.position).x, getMainViewportPostion(this.position).y, 1] )
             }
         }
+        // start draw the extra info
+        if (this.extraRenderList) {
+            startDrawInfo({ ctx }, this.extraRenderList)
+        }
       
         return this
     }
@@ -440,8 +479,13 @@ class Role {
     }
     Death() {
         let direction = this.curEvent.slice(0, 1)
-        this.curEvent = `${direction}_death`
+        this.initFrameInfo(`${direction}_death`)
         this.curRender.cantChangeEvent = true
+    }
+    addExtraRenderInfo (extraInfo) {
+        let _extraInfo = extraInfo.bind(this)
+        this.extraRenderList.push(_extraInfo())
+        return this;
     }
 }
 
@@ -465,6 +509,7 @@ class Skill {
         return this;
     }
     resetFrameInfo(eventName) {
+        if (this.curRender.cantChangeEvent) return
         this.curRender.curEvent = this.curEvent
         if (!this.resetCurRender) this.resetCurRender = JSON.parse(JSON.stringify(this.curRender))
         this.initFrameInfo(eventName)
@@ -521,7 +566,7 @@ class Skill {
         const imgSize = getCenterOriginByString(curRenderBother.imgSizeInfo)
         if (curRenderBother) {
             this.curRender.curFrameInfo = curRenderBother
-            const { x, y } = this.position
+            const { x, y } = getMainViewportPostion(this.position)
             let renderXInCanvas = Math.round(x - centerOriginxy.x)
             let renderYInCanvas = Math.round(y - centerOriginxy.y)
             ctx.drawImage(Img, 0, 0,imgSize.x, imgSize.y, renderXInCanvas, renderYInCanvas, imgSize.x, imgSize.y)
@@ -592,26 +637,29 @@ loadInitResources(() => {
 
     setTimeout(() => {
         gameNew.resetMainViewportPosition()
-        userNew.addPosition({ x: 200 + 200, y: 200 + 200, z: 0 }).addAction('action', walking, { needTrigger: true, codeDownTime: 0 }).addAction('attackAction', attackAction, { needTrigger: true, codeDownTime: 0 })
-        // monster_01_new.addPosition({ x: 1000 + 100, y: 500 + 200, z: 0 })
+        userNew
+        .addPosition({ x: 200 + 200, y: 200 + 200, z: 0 })
+        .addAction('action', walking, { needTrigger: true, codeDownTime: 0 })
+        .addAction('attackAction', attackAction, { needTrigger: true, codeDownTime: 0 })
+        .addExtraRenderInfo(createName)
+        // monster_01_new.addPosition({ x: 200 + Math.random() * 500, y: 0 + Math.random() * 500, z: 0 })
         // .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0 })
         // .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
-        // gameNew.addNewHero(userNew).addNewMonster(monster_01_new)
         gameNew.addNewHero(userNew)
+        // gameNew.addNewHero(userNew).addNewMonster(monster_01_new)
         
     }, 2000);
 
-    // setInterval(() => {
-    //     gameNew.addNewMonster(
-    //         new Role(Math.random() > 0.5 ? monster_01 : monster_02)
-    //         .addPosition({ x: 1000 + Math.random()*500, y: 500 + Math.random() * 500, z: 0 })
-    //         .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0})
-    //         .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
-    //     )
-    // }, 9900);
+    setInterval(() => {
+        gameNew.addNewMonster(
+            new Role(Math.random() > 0.5 ? monster_01 : monster_02)
+            .addPosition({ x: Math.random()*1000, y: Math.random() * 700, z: 0 })
+            .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0})
+            .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
+        )
+    }, 9900);
 
 })
-
 
 
 

@@ -1,3 +1,5 @@
+import { drawDot, drawPolygon, scalePoints, regressOrigin, flatArr } from "./canvasTool"
+
 export const drawMap = function ({ ctx, mainViewportPosition }) {
     const { map, leftDistances, topDistances, height, width, scale } = mainViewportPosition
     let _map = window.resources[map]
@@ -47,4 +49,28 @@ const checkPointOnTheLineSegmentCreatByTwoPoints = function([x1, y1, x2, y2, x, 
     } else {
         return false
     }
+}
+
+/**
+ * check map remora
+ * mapRule[arr] v[class role] success [func] fail [func] ctx
+ * 
+ */
+export const checkMapRemora = function(mapRule, v, fail, success, ctx) {
+    let checkResult = mapRule.map(mapRuleItem => {
+        let _scaledPoints = scalePoints(mapRuleItem.polygonPoints, this.mainViewportPosition.scale) // 缩放map坐标体系
+        let _regressedOriginPoints = regressOrigin(_scaledPoints, this.mainViewportPosition.leftDistances, this.mainViewportPosition.topDistances) // 回归canvas 坐标体系
+        let _flatPoints = flatArr(_regressedOriginPoints)
+        if (this.debug && ctx) {
+            drawPolygon({ ctx, color: 'green' }, _flatPoints)
+        }
+        return checkPointInMap(_scaledPoints, { x: v.position.x, y: v.position.y  }, mapRuleItem.type)
+    })
+    if (v.oldPosition && checkResult.some(v => v === false)) {
+        // 碰撞到障碍物或者不在规定区域
+        fail && fail()
+    } else {
+        success && success()
+    }
+    return checkResult;
 }

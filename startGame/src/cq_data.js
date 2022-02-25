@@ -187,7 +187,7 @@ const generateFrameList = (params) => {
 export const user = {
     role: {
         id: 1,
-        name: "new_dco004",
+        name: "一二123",
         des: "user control human description",
         hp: CONSTANT_COMMON.BASE_HERO_HP,
         atk: CONSTANT_COMMON.BASE_HERO_ATK,
@@ -620,4 +620,37 @@ const handleMonsterStand = function (event, that) {
             break
         default: () => {}
     }
+}
+
+
+/**
+ * basic interface info
+ */
+export const createName = function() {
+    return [{
+        position: 'absolute', // position attr : fixed | abosolute | alignCenter | default === absolute,
+        modal: 'div',
+        initOrigin: () => {
+            return [this.position.x - 20, this.position.y - 60]
+        },
+        borderStyle: {
+            width: 0,
+            color: '#fff',
+        },
+        layoutInfo: {
+            left: 0,
+            top: 0,
+            width: 40,
+            height: 14,
+        },
+        child: [{
+            position: 'alignCenter',
+            modal: 'font',
+            content: this.state.name,
+            layoutInfo: {
+                fontSize: 12,
+                letterSpacing: 0,
+            }
+        }]
+    }]
 }
