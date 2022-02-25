@@ -265,6 +265,7 @@ export const user = {
         name: "new_ms001",
         des: "monster named chicken",
         hp: CONSTANT_COMMON.BASE_HERO_HP,
+        maxHp: CONSTANT_COMMON.BASE_HERO_HP,
         atk: CONSTANT_COMMON.BASE_HERO_ATK,
         def: CONSTANT_COMMON.BASE_HERO_DEF,
         spd: CONSTANT_COMMON.BASE_MONSTER_SPD,
@@ -340,6 +341,7 @@ export const user = {
         name: "new_ms002",
         des: "monster named deer",
         hp: CONSTANT_COMMON.BASE_HERO_HP,
+        maxHp: CONSTANT_COMMON.BASE_HERO_HP,
         atk: CONSTANT_COMMON.BASE_HERO_ATK,
         def: CONSTANT_COMMON.BASE_HERO_DEF,
         spd: CONSTANT_COMMON.BASE_MONSTER_SPD,
@@ -650,6 +652,41 @@ export const createName = function() {
             layoutInfo: {
                 fontSize: 12,
                 letterSpacing: 0,
+            }
+        }]
+    }]
+}
+
+export const showHp = function() {
+    return [{
+        position: 'absolute', // position attr : fixed | abosolute | alignCenter | default === absolute,
+        modal: 'div',
+        initOrigin: () => {
+            return [this.position.x - 20, this.position.y - 60]
+        },
+        borderStyle: {
+            width: 1,
+            color: '#fff',
+        },
+        layoutInfo: {
+            left: 0,
+            top: 0,
+            width: 35,
+            height: 6,
+        },
+        child: [{
+            position: 'alignCenter',
+            modal: 'hp',
+            getContent: () => {
+                return {
+                    maxHp: this.state.maxHp,
+                    hp: this.state.hp,
+                }
+            },
+            layoutInfo: {
+                width: 35,
+                height: 6,
+                fontSize: 10,
             }
         }]
     }]

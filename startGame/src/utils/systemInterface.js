@@ -86,6 +86,9 @@ const handleEachInfoPart = ({ ctx }, eachExtraInfoPart, parent) => {
             case 'img':
                 drawFonts({ ctx }, item, parent)
                 break;
+            case 'hp':
+                drawHp({ ctx }, item, parent)
+                break;
         }
         if (item.child) {
             handleEachInfoPart({ ctx }, item.child, item)
@@ -111,6 +114,25 @@ const drawFonts = ({ ctx }, item, parent) => {
         // let startOrigin =  [parent.canvasOrigin.x, parent.canvasOrigin.y]
         typewriting({ ctx }, startOrigin, item.content, { letterSpacing, lineHeight, fontSize, ...item.layoutInfo })
     }
+}
+
+const drawHp = ({ ctx }, item, parent) => {
+    let { width, height, fontSize = 12, fontFamily = '' } = item.layoutInfo;
+    let { x, y } = parent.canvasOrigin;
+    let { hp, maxHp } = item.content || item.getContent()
+    let hpWidth = width * ((hp || 0) / maxHp)
+    if (hpWidth < 0) { hpWidth = 0 }
+    ctx.beginPath();
+    ctx.strokeStyle = 'red'
+    ctx.moveTo(x,y + (height / 2));
+    ctx.lineTo(x + hpWidth,y + (height / 2));
+    ctx.lineWidth = height;
+    ctx.stroke();
+
+    ctx.direction = 'ltr'
+    ctx.fillStyle = '#FFF'
+    ctx.font = `${fontSize}px  ${fontFamily || 'Arial'}`
+    ctx.fillText(`${hp}/${maxHp}`, x + width + 2, y + height)
 }
 
 const computedFontWidthAndHeight = () => {
