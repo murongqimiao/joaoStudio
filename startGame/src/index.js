@@ -19,7 +19,7 @@ class Game {
     keyCollectBuffer = []
     allRenderList = []
     currentRoleId = 0
-    debug = 1
+    debug = 0
     currentFrameIndexPerSeconde = 0
     gameFPS = 60
     gameStatus = {
@@ -55,7 +55,7 @@ class Game {
         ctx.clearRect(0, 0, c.width, c.height)
         const that = this;
         // 绘制地图
-        // drawMap({ ctx, mainViewportPosition: this.mainViewportPosition })
+        drawMap({ ctx, mainViewportPosition: this.mainViewportPosition })
 
         // 执行行为
         let needUpdate = false
@@ -135,7 +135,7 @@ class Game {
         ctx.fillText(FPSText, 10, 20)
 
         // 绘制系统界面
-        // handleDrawInterface({ ctx, game: this })
+        handleDrawInterface({ ctx, game: this })
 
         // 执行下一帧
         this.currentFrameIndexPerSeconde++
@@ -423,7 +423,7 @@ class Role {
 
             let renderXInCanvas = Math.round(x - centerOriginxy.x)
             let renderYInCanvas = Math.round(y - centerOriginxy.y)
-            // ctx.drawImage(Img, 0, 0,imgSize.x, imgSize.y, renderXInCanvas, renderYInCanvas, imgSize.x, imgSize.y)
+            ctx.drawImage(Img, 0, 0,imgSize.x, imgSize.y, renderXInCanvas, renderYInCanvas, imgSize.x, imgSize.y)
 
             if (debug) {
                 // 体积描边
@@ -569,7 +569,7 @@ class Skill {
             const { x, y } = getMainViewportPostion(this.position)
             let renderXInCanvas = Math.round(x - centerOriginxy.x)
             let renderYInCanvas = Math.round(y - centerOriginxy.y)
-            // ctx.drawImage(Img, 0, 0,imgSize.x, imgSize.y, renderXInCanvas, renderYInCanvas, imgSize.x, imgSize.y)
+            ctx.drawImage(Img, 0, 0,imgSize.x, imgSize.y, renderXInCanvas, renderYInCanvas, imgSize.x, imgSize.y)
 
             if (debug) {
                 // 体积描边
@@ -658,7 +658,7 @@ loadInitResources(() => {
             .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
             .addExtraRenderInfo(showHp)
         )
-    }, 9900);
+    }, 2000);
 
 })
 

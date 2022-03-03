@@ -187,7 +187,7 @@ const generateFrameList = (params) => {
 export const user = {
     role: {
         id: 1,
-        name: "一二123",
+        name: "主角abc",
         des: "user control human description",
         hp: CONSTANT_COMMON.BASE_HERO_HP,
         atk: CONSTANT_COMMON.BASE_HERO_ATK,
@@ -633,7 +633,7 @@ export const createName = function() {
         position: 'absolute', // position attr : fixed | abosolute | alignCenter | default === absolute,
         modal: 'div',
         initOrigin: () => {
-            return [this.position.x - 20, this.position.y - 60]
+            return [this.position.x - 20, this.position.y - 120]
         },
         borderStyle: {
             width: 0,
@@ -662,7 +662,7 @@ export const showHp = function() {
         position: 'absolute', // position attr : fixed | abosolute | alignCenter | default === absolute,
         modal: 'div',
         initOrigin: () => {
-            return [this.position.x - 20, this.position.y - 60]
+            return [this.position.x - 20, this.position.y - 80]
         },
         borderStyle: {
             width: 1,
