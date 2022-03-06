@@ -166,6 +166,7 @@ const generateFrameList = (params) => {
                         imgSizeInfo,
                         shape
                     })
+                    console.log(frameItem)
                     
                 }
             }
@@ -690,4 +691,18 @@ export const showHp = function() {
             }
         }]
     }]
+}
+
+
+/**
+ * materials info
+ */
+export const materials = {
+    '0001': {
+        role: {
+            logo: '1.png',
+            isSprite: true,
+            isMonster: false
+        }
+    }
 }

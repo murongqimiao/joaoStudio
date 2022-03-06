@@ -1,7 +1,7 @@
 // import { footMan, Monster01, goldCoinInMap, walking, getImageFromX_Y, CONSTANT_COMMON } from "./data"
-import { monster_01, monster_02, user, walking, monsterEventHandler, skill_01, MAP_REMORA, createName, showHp } from "./cq_data"
+import { monster_01, monster_02, materials, user, walking, monsterEventHandler, skill_01, MAP_REMORA, createName, showHp } from "./cq_data"
 import { collisionDetection, getBulkBorder, getXYWHSByString, getCenterOriginByString } from "./utils/collisionDetection"
-import { loadInitResources } from "./utils/checkResourceLoad"
+import { loadInitResources, getPicByPicName } from "./utils/checkResourceLoad"
 import { drawDot, drawPolygon, scalePoints, regressOrigin, flatArr } from "./utils/canvasTool"
 import { monsterMainMind } from "./utils/monsterAI"
 import { addGameListener } from "./utils/addGameListener"
@@ -19,7 +19,7 @@ class Game {
     keyCollectBuffer = []
     allRenderList = []
     currentRoleId = 0
-    debug = 0
+    debug = 1
     currentFrameIndexPerSeconde = 0
     gameFPS = 60
     gameStatus = {
@@ -412,7 +412,24 @@ class Role {
             curRenderBother = frameList[curFrameImgIndex]
             this.curRender.curFrame++
         }
-        const Img = window.resources[curRenderBother.name]
+        let Img = ''
+        if (this.state.isSprite) { // 雪碧图的取值逻辑不同
+            /**
+             * curRenderBother 
+             *   centerOrigin: "187_219"
+             *   frameStayTime: 7
+             *   imgSizeInfo: "374_438"
+             *   name: "_skill_new_jn10020_7_stand_0"
+             *   shape: "rectangle"
+             *   volumeInfo: "100_100_70_70_0
+             */
+            let _spriteInfo = getPicByPicName(this.state.logo)
+            console.log("_spriteInfo", _spriteInfo)
+            Img = ''
+            curRenderBother = {}
+        } else {
+            Img = window.resources[curRenderBother.name]
+        }
         const xywhs = getXYWHSByString(curRenderBother.volumeInfo)
         const centerOriginxy = getCenterOriginByString(curRenderBother.centerOrigin)
         const imgSize = getCenterOriginByString(curRenderBother.imgSizeInfo)
@@ -635,20 +652,18 @@ loadInitResources(() => {
         gameNew.getFPS()
     }, 1000);
 
-    setTimeout(() => {
-        gameNew.resetMainViewportPosition()
-        userNew
-        .addPosition({ x: 200 + 200, y: 200 + 200, z: 0 })
-        .addAction('action', walking, { needTrigger: true, codeDownTime: 0 })
-        .addAction('attackAction', attackAction, { needTrigger: true, codeDownTime: 0 })
-        .addExtraRenderInfo(createName)
-        // monster_01_new.addPosition({ x: 200 + Math.random() * 500, y: 0 + Math.random() * 500, z: 0 })
-        // .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0 })
-        // .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
-        gameNew.addNewHero(userNew)
-        // gameNew.addNewHero(userNew).addNewMonster(monster_01_new)
+    gameNew.resetMainViewportPosition()
+    userNew
+    .addPosition({ x: 200 + 200, y: 200 + 200, z: 0 })
+    .addAction('action', walking, { needTrigger: true, codeDownTime: 0 })
+    .addAction('attackAction', attackAction, { needTrigger: true, codeDownTime: 0 })
+    .addExtraRenderInfo(createName)
+    // monster_01_new.addPosition({ x: 200 + Math.random() * 500, y: 0 + Math.random() * 500, z: 0 })
+    // .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0 })
+    // .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
+    gameNew.addNewHero(userNew)
+    // gameNew.addNewHero(userNew).addNewMonster(monster_01_new)
         
-    }, 2000);
 
     setInterval(() => {
         gameNew.addNewMonster(
@@ -657,6 +672,10 @@ loadInitResources(() => {
             .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0})
             .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
             .addExtraRenderInfo(showHp)
+        )
+        gameNew.addNewMonster(
+            new Role(materials['0001'])
+            .addPosition({ x: Math.random()*1000, y: Math.random() * 700, z: 0 })
         )
     }, 2000);
 
