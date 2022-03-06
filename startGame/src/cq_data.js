@@ -698,11 +698,113 @@ export const showHp = function() {
  * materials info
  */
 export const materials = {
+    // 小红瓶
     '0001': {
         role: {
             logo: '1.png',
             isSprite: true,
             isMonster: false
         }
-    }
+    },
+    // 中红瓶
+    '0002': {
+      role: {
+          logo: '2.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 大红瓶
+    '0003': {
+      role: {
+          logo: '3.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 小蓝瓶
+    '0004': {
+      role: {
+          logo: '4.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 中蓝瓶
+    '0005': {
+      role: {
+          logo: '5.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 大蓝瓶
+    '0006': {
+      role: {
+          logo: '6.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+     // 小蓝瓶
+     '0007': {
+      role: {
+          logo: 'h7.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 中蓝瓶
+    '0008': {
+      role: {
+          logo: '1018.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 大蓝瓶
+    '0009': {
+      role: {
+          logo: '1019.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 大蓝瓶
+    '0010': {
+      role: {
+          logo: 'b10110.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 大蓝瓶
+    '0011': {
+      role: {
+          logo: 'b10011.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    '1003': {
+      role: {
+        logo: '1003.png',
+        isSprite: true,
+        isMonster: false
+      }
+    },
+    '1027': {
+      role: {
+        logo: '1027.png',
+        isSprite: true,
+        isMonster: false
+      }
+    },
+    '1028': {
+      role: {
+        logo: '1028.png',
+        isSprite: true,
+        isMonster: false
+      }
+    },
 }

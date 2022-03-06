@@ -13,7 +13,10 @@ module.exports = {
         rules: [{
             test: /.(jpg|png)$/,
             use: ['url-loader']
-        }]
+        }, {
+          test: /.list$/,
+          use: ['xml-loader']
+        }],
     },
     plugins: [
         new CopyWebpackPlugin({

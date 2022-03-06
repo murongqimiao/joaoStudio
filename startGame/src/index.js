@@ -1,7 +1,7 @@
 // import { footMan, Monster01, goldCoinInMap, walking, getImageFromX_Y, CONSTANT_COMMON } from "./data"
 import { monster_01, monster_02, materials, user, walking, monsterEventHandler, skill_01, MAP_REMORA, createName, showHp } from "./cq_data"
-import { collisionDetection, getBulkBorder, getXYWHSByString, getCenterOriginByString } from "./utils/collisionDetection"
-import { loadInitResources, getPicByPicName } from "./utils/checkResourceLoad"
+import { collisionDetection, getBulkBorder, getXYWHSByString, getCenterOriginByString, getOffsetXYByString } from "./utils/collisionDetection"
+import { loadInitResources, getPicByPicName, computedCurRenderBother } from "./utils/checkResourceLoad"
 import { drawDot, drawPolygon, scalePoints, regressOrigin, flatArr } from "./utils/canvasTool"
 import { monsterMainMind } from "./utils/monsterAI"
 import { addGameListener } from "./utils/addGameListener"
@@ -423,16 +423,15 @@ class Role {
              *   shape: "rectangle"
              *   volumeInfo: "100_100_70_70_0
              */
-            let _spriteInfo = getPicByPicName(this.state.logo)
-            console.log("_spriteInfo", _spriteInfo)
-            Img = ''
-            curRenderBother = {}
+            Img = getPicByPicName(this.state.logo)
+            curRenderBother = computedCurRenderBother(this.state.logo)
         } else {
             Img = window.resources[curRenderBother.name]
         }
         const xywhs = getXYWHSByString(curRenderBother.volumeInfo)
         const centerOriginxy = getCenterOriginByString(curRenderBother.centerOrigin)
         const imgSize = getCenterOriginByString(curRenderBother.imgSizeInfo)
+        const offset = getOffsetXYByString(curRenderBother.offset || "")
         if (curRenderBother) {
             this.curRender.curFrameInfo = curRenderBother
             
@@ -440,7 +439,7 @@ class Role {
 
             let renderXInCanvas = Math.round(x - centerOriginxy.x)
             let renderYInCanvas = Math.round(y - centerOriginxy.y)
-            ctx.drawImage(Img, 0, 0,imgSize.x, imgSize.y, renderXInCanvas, renderYInCanvas, imgSize.x, imgSize.y)
+            ctx.drawImage(Img, offset.x, offset.y,imgSize.x, imgSize.y, renderXInCanvas, renderYInCanvas, imgSize.x, imgSize.y)
 
             if (debug) {
                 // 体积描边
@@ -664,6 +663,18 @@ loadInitResources(() => {
     gameNew.addNewHero(userNew)
     // gameNew.addNewHero(userNew).addNewMonster(monster_01_new)
         
+    gameNew.addNewMonster(
+      new Role(materials['0009'])
+      .addPosition({ x: 300, y: 300, z: 0 })
+    )
+    gameNew.addNewMonster(
+      new Role(materials['0010'])
+      .addPosition({ x: 300, y: 400, z: 0 })
+    )
+    gameNew.addNewMonster(
+      new Role(materials['0011'])
+      .addPosition({ x:300, y: 500, z: 0 })
+    )
 
     setInterval(() => {
         gameNew.addNewMonster(
@@ -674,7 +685,7 @@ loadInitResources(() => {
             .addExtraRenderInfo(showHp)
         )
         gameNew.addNewMonster(
-            new Role(materials['0001'])
+            new Role(materials['0008'])
             .addPosition({ x: Math.random()*1000, y: Math.random() * 700, z: 0 })
         )
     }, 2000);

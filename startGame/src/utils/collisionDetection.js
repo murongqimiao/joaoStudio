@@ -188,6 +188,18 @@ export const getCenterOriginByString = (str) => {
 }
 
 /**
+ * get img offset x offset y 
+ * @returns 
+ */
+export const getOffsetXYByString = (str) => {
+  const [x = 0, y = 0] = str.split("_")
+  return {
+      x: Number(x),
+      y: Number(y),
+  }
+}
+
+/**
  * 
  * get skill position width hero stand
  */

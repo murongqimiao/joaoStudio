@@ -5,7 +5,7 @@
 const renderLoadStatusInWindow = (percent) => {
     const el = document.querySelector('#load-status')
     const msg = percent === 100 ? `加载完成` : `...已加载${Math.floor(percent * 100)}%`
-    el.innerHTML = msg
+    if (el) el.innerHTML = msg
 }
 
 const removeLoadStatusInWindow = () => {
@@ -93,7 +93,6 @@ const loadXml = (file) => {
         }  
     }
     let name = file.split('/').pop()
-    console.log(name)
     parseXml(xmlDoc, name)
 }
 
@@ -126,10 +125,10 @@ export const getPicByPicName = (name) => {
             result = Object.assign(window.plist[key].frames[name],window.plist[key].metadata)
         }
     })
-    return result
+    return window.resources['_icon_' + result.realTextureFileName.split(".")[0]]
 }
 
-export const computedCurRenderBother = (params) => {
+export const computedCurRenderBother = (name) => {
     /**
      *   params
      *   format: "2"
@@ -152,10 +151,23 @@ export const computedCurRenderBother = (params) => {
      *   shape: "rectangle"
      *   volumeInfo: "100_100_70_70_0
      */
+    let params = {}
+    Object.keys(window.plist).forEach(key => {
+      if (window.plist[key].frames[name]) {
+          params = Object.assign(window.plist[key].frames[name],window.plist[key].metadata)
+      }
+    })
     let result = {
         centerOrigin: "0_0",
         imgSizeInfo: "0_0",
-        
+        name: params.realTextureFileName,
+        shape: "rectangle",
+        volumeInfo: "0_0_0_0_0",
+        offset: "0_0"
     }
-    
+    result.imgSizeInfo = params.frame.split("},{")[1].replaceAll("}}", "").replaceAll(",", "_")
+    result.centerOrigin = result.imgSizeInfo.split("_").map(v => Number(v / 2)).join("_")
+    result.offset = params.frame.split("},{")[0].replaceAll("{{", "").replaceAll(",", "_")
+    result.volumeInfo = "0_0_" + result.imgSizeInfo + "_0"
+    return result
 }
