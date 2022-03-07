@@ -8,6 +8,7 @@ export const attackEvent = function (HitObj, BeHitObj, type) {
                 if (BeHitObj.state.isMonster) {
                     BeHitObj.addFrameEndEvent(function() {
                         this.delete = true
+                        window.__game.removeMonster(BeHitObj)
                     }.bind(BeHitObj))
                 }
             }

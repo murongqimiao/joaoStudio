@@ -325,6 +325,16 @@ export const user = {
                 this.position.y = self.curRender.lastFrame.y1
             }
         }
+    },
+    onDead: function (game, monster) {
+      const { position } = monster
+      game.addNewMonster(
+        new window.__Role(materials['g_icon_money4'])
+        .addPosition({
+          x: Math.floor(position.x),
+          y: Math.floor(position.y)
+        })
+      )
     }
 }
 
@@ -392,6 +402,16 @@ export const user = {
     onMonsterAdd: function () {
         const [game, self] = arguments
         self.curEvent = self.state.defaultEvent
+    },
+    onDead: function (game, monster) {
+      const { position } = monster
+      game.addNewMonster(
+        new window.__Role(materials['g_icon_money4'])
+        .addPosition({
+          x: Math.floor(position.x),
+          y: Math.floor(position.y)
+        })
+      )
     },
     onCrash: function () {
         const [self, crashItem] = arguments
@@ -765,7 +785,7 @@ export const materials = {
     // 大蓝瓶
     '0009': {
       role: {
-          logo: '1019.png',
+          logo: '1017.png',
           isSprite: true,
           isMonster: false
       }
@@ -773,7 +793,7 @@ export const materials = {
     // 大蓝瓶
     '0010': {
       role: {
-          logo: 'b10110.png',
+          logo: 'b10083.png',
           isSprite: true,
           isMonster: false
       }
@@ -781,14 +801,88 @@ export const materials = {
     // 大蓝瓶
     '0011': {
       role: {
-          logo: 'b10011.png',
+          logo: 'b10084.png',
           isSprite: true,
           isMonster: false
       }
     },
     '1003': {
       role: {
-        logo: '1003.png',
+        logo: 'b10087.png',
+        isSprite: true,
+        isMonster: false
+      }
+    },
+    // 金币卡片
+    'b10087': {
+      role: {
+        logo: 'b10087.png',
+        isSprite: true,
+        isMonster: false
+      }
+    },
+    // 金币掉落形态
+    'g_icon_money4': {
+      role: {
+          logo: 'g_icon_money4.png',
+          isSprite: true,
+          isMonster: false,
+          name: "金币",
+          desc: "掉落的金币, 为什么怪物会掉落金币呢, 这至今是个谜。"
+      }
+    },
+    // 斧子掉落形态
+    'g_icon_1001': {
+      role: {
+        logo: 'g_icon_1001.png',
+        isSprite: true,
+        isMonster: false
+      }
+    },
+     // 扇子掉落形态
+    'g_icon_1003': {
+      role: {
+          logo: 'g_icon_1003.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 红色大保健掉落形态
+    'g_icon_1004': {
+      role: {
+          logo: 'g_icon_1004.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 黄色大保健掉落形态
+    'g_icon_1005': {
+      role: {
+        logo: 'g_icon_1005.png',
+        isSprite: true,
+        isMonster: false
+      }
+    },
+    // 蓝色三角圆球
+    'b10041': {
+      role: {
+          logo: 'b10041.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 绿色三角圆球
+    'b10042': {
+      role: {
+          logo: 'b10042.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 十字圆球章
+    'b10043': {
+      role: {
+        logo: 'b10043.png',
         isSprite: true,
         isMonster: false
       }

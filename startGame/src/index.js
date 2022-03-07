@@ -180,8 +180,8 @@ class Game {
             monster.onMonsterAdd && this.onMonsterAdd(monster)
             this.updateAllRenderList()
         } else {
-            console.log('=============err==========')
-            console.error('add new monster fail, new monster position not available')
+            // console.log('=============err==========')
+            // console.error('add new monster fail, new monster position not available')
         }
         return this;
     }
@@ -219,10 +219,10 @@ class Game {
     }
 
     removeMonster(monster) {
-        let index = this.monsterList.findIndex(v => v.name === monster.name)
+        let index = this.monsterList.findIndex(v => v.currentId === monster.currentId)
         this.monsterList.splice(index, 1)
         console.log("remove Monster,", this.monsterList)
-        monster.onMonsterDead && this.onMonsterDead(monster)
+        monster.onDead && monster.onDead(this, monster)
         this.updateAllRenderList()
         return this;
     }
@@ -249,7 +249,8 @@ class Game {
 
     // 更新
     updateAllRenderList() {
-        this.allRenderList = [].concat(this.monsterList).concat(this.heroList).concat(this.environmentList).concat(this.skillList).filter(v => !v.delete)
+
+        this.allRenderList = [].concat(this.monsterList).concat(this.heroList).concat(this.environmentList).concat(this.skillList).filter(v => { return !v.delete })
     }
 
     keyActiveCollect(handle, key) {
@@ -299,7 +300,7 @@ class Game {
         monster.onMonsterAdd(this, monster)
     }
     onMonsterDead(monster) {
-        monster.onMonsterDead(this, monster)
+        monster.onDead(this, monster)
     }
     onHeroAdd(hero) {
         hero.onHeroAdd(this, hero)
@@ -663,19 +664,6 @@ loadInitResources(() => {
     gameNew.addNewHero(userNew)
     // gameNew.addNewHero(userNew).addNewMonster(monster_01_new)
         
-    gameNew.addNewMonster(
-      new Role(materials['0009'])
-      .addPosition({ x: 300, y: 300, z: 0 })
-    )
-    gameNew.addNewMonster(
-      new Role(materials['0010'])
-      .addPosition({ x: 300, y: 400, z: 0 })
-    )
-    gameNew.addNewMonster(
-      new Role(materials['0011'])
-      .addPosition({ x:300, y: 500, z: 0 })
-    )
-
     setInterval(() => {
         gameNew.addNewMonster(
             new Role(Math.random() > 0.5 ? monster_01 : monster_02)
@@ -683,10 +671,6 @@ loadInitResources(() => {
             .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0})
             .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
             .addExtraRenderInfo(showHp)
-        )
-        gameNew.addNewMonster(
-            new Role(materials['0008'])
-            .addPosition({ x: Math.random()*1000, y: Math.random() * 700, z: 0 })
         )
     }, 2000);
 
