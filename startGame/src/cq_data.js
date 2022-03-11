@@ -166,6 +166,7 @@ const generateFrameList = (params) => {
                         imgSizeInfo,
                         shape
                     })
+                    console.log(frameItem)
                     
                 }
             }
@@ -324,6 +325,16 @@ export const user = {
                 this.position.y = self.curRender.lastFrame.y1
             }
         }
+    },
+    onDead: function (game, monster) {
+      const { position } = monster
+      game.addNewMonster(
+        new window.__Role(materials['g_icon_money4'])
+        .addPosition({
+          x: Math.floor(position.x),
+          y: Math.floor(position.y)
+        })
+      )
     }
 }
 
@@ -391,6 +402,16 @@ export const user = {
     onMonsterAdd: function () {
         const [game, self] = arguments
         self.curEvent = self.state.defaultEvent
+    },
+    onDead: function (game, monster) {
+      const { position } = monster
+      game.addNewMonster(
+        new window.__Role(materials['g_icon_money4'])
+        .addPosition({
+          x: Math.floor(position.x),
+          y: Math.floor(position.y)
+        })
+      )
     },
     onCrash: function () {
         const [self, crashItem] = arguments
@@ -690,4 +711,194 @@ export const showHp = function() {
             }
         }]
     }]
+}
+
+
+/**
+ * materials info
+ */
+export const materials = {
+    // 小红瓶
+    '0001': {
+        role: {
+            logo: '1.png',
+            isSprite: true,
+            isMonster: false
+        }
+    },
+    // 中红瓶
+    '0002': {
+      role: {
+          logo: '2.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 大红瓶
+    '0003': {
+      role: {
+          logo: '3.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 小蓝瓶
+    '0004': {
+      role: {
+          logo: '4.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 中蓝瓶
+    '0005': {
+      role: {
+          logo: '5.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 大蓝瓶
+    '0006': {
+      role: {
+          logo: '6.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+     // 小蓝瓶
+     '0007': {
+      role: {
+          logo: 'h7.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 中蓝瓶
+    '0008': {
+      role: {
+          logo: '1018.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 大蓝瓶
+    '0009': {
+      role: {
+          logo: '1017.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 大蓝瓶
+    '0010': {
+      role: {
+          logo: 'b10083.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 大蓝瓶
+    '0011': {
+      role: {
+          logo: 'b10084.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    '1003': {
+      role: {
+        logo: 'b10087.png',
+        isSprite: true,
+        isMonster: false
+      }
+    },
+    // 金币卡片
+    'b10087': {
+      role: {
+        logo: 'b10087.png',
+        isSprite: true,
+        isMonster: false
+      }
+    },
+    // 金币掉落形态
+    'g_icon_money4': {
+      role: {
+          logo: 'g_icon_money4.png',
+          isSprite: true,
+          isMonster: false,
+          name: "金币",
+          desc: "掉落的金币, 为什么怪物会掉落金币呢, 这至今是个谜。"
+      }
+    },
+    // 斧子掉落形态
+    'g_icon_1001': {
+      role: {
+        logo: 'g_icon_1001.png',
+        isSprite: true,
+        isMonster: false
+      }
+    },
+     // 扇子掉落形态
+    'g_icon_1003': {
+      role: {
+          logo: 'g_icon_1003.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 红色大保健掉落形态
+    'g_icon_1004': {
+      role: {
+          logo: 'g_icon_1004.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 黄色大保健掉落形态
+    'g_icon_1005': {
+      role: {
+        logo: 'g_icon_1005.png',
+        isSprite: true,
+        isMonster: false
+      }
+    },
+    // 蓝色三角圆球
+    'b10041': {
+      role: {
+          logo: 'b10041.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 绿色三角圆球
+    'b10042': {
+      role: {
+          logo: 'b10042.png',
+          isSprite: true,
+          isMonster: false
+      }
+    },
+    // 十字圆球章
+    'b10043': {
+      role: {
+        logo: 'b10043.png',
+        isSprite: true,
+        isMonster: false
+      }
+    },
+    '1027': {
+      role: {
+        logo: '1027.png',
+        isSprite: true,
+        isMonster: false
+      }
+    },
+    '1028': {
+      role: {
+        logo: '1028.png',
+        isSprite: true,
+        isMonster: false
+      }
+    },
 }

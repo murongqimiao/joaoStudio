@@ -1,7 +1,7 @@
 // import { footMan, Monster01, goldCoinInMap, walking, getImageFromX_Y, CONSTANT_COMMON } from "./data"
-import { monster_01, monster_02, user, walking, monsterEventHandler, skill_01, MAP_REMORA, createName, showHp } from "./cq_data"
-import { collisionDetection, getBulkBorder, getXYWHSByString, getCenterOriginByString } from "./utils/collisionDetection"
-import { loadInitResources } from "./utils/checkResourceLoad"
+import { monster_01, monster_02, materials, user, walking, monsterEventHandler, skill_01, MAP_REMORA, createName, showHp } from "./cq_data"
+import { collisionDetection, getBulkBorder, getXYWHSByString, getCenterOriginByString, getOffsetXYByString } from "./utils/collisionDetection"
+import { loadInitResources, getPicByPicName, computedCurRenderBother } from "./utils/checkResourceLoad"
 import { drawDot, drawPolygon, scalePoints, regressOrigin, flatArr } from "./utils/canvasTool"
 import { monsterMainMind } from "./utils/monsterAI"
 import { addGameListener } from "./utils/addGameListener"
@@ -19,7 +19,7 @@ class Game {
     keyCollectBuffer = []
     allRenderList = []
     currentRoleId = 0
-    debug = 0
+    debug = 1
     currentFrameIndexPerSeconde = 0
     gameFPS = 60
     gameStatus = {
@@ -180,8 +180,8 @@ class Game {
             monster.onMonsterAdd && this.onMonsterAdd(monster)
             this.updateAllRenderList()
         } else {
-            console.log('=============err==========')
-            console.error('add new monster fail, new monster position not available')
+            // console.log('=============err==========')
+            // console.error('add new monster fail, new monster position not available')
         }
         return this;
     }
@@ -219,10 +219,10 @@ class Game {
     }
 
     removeMonster(monster) {
-        let index = this.monsterList.findIndex(v => v.name === monster.name)
+        let index = this.monsterList.findIndex(v => v.currentId === monster.currentId)
         this.monsterList.splice(index, 1)
         console.log("remove Monster,", this.monsterList)
-        monster.onMonsterDead && this.onMonsterDead(monster)
+        monster.onDead && monster.onDead(this, monster)
         this.updateAllRenderList()
         return this;
     }
@@ -249,7 +249,8 @@ class Game {
 
     // 更新
     updateAllRenderList() {
-        this.allRenderList = [].concat(this.monsterList).concat(this.heroList).concat(this.environmentList).concat(this.skillList).filter(v => !v.delete)
+
+        this.allRenderList = [].concat(this.monsterList).concat(this.heroList).concat(this.environmentList).concat(this.skillList).filter(v => { return !v.delete })
     }
 
     keyActiveCollect(handle, key) {
@@ -299,7 +300,7 @@ class Game {
         monster.onMonsterAdd(this, monster)
     }
     onMonsterDead(monster) {
-        monster.onMonsterDead(this, monster)
+        monster.onDead(this, monster)
     }
     onHeroAdd(hero) {
         hero.onHeroAdd(this, hero)
@@ -412,10 +413,26 @@ class Role {
             curRenderBother = frameList[curFrameImgIndex]
             this.curRender.curFrame++
         }
-        const Img = window.resources[curRenderBother.name]
+        let Img = ''
+        if (this.state.isSprite) { // 雪碧图的取值逻辑不同
+            /**
+             * curRenderBother 
+             *   centerOrigin: "187_219"
+             *   frameStayTime: 7
+             *   imgSizeInfo: "374_438"
+             *   name: "_skill_new_jn10020_7_stand_0"
+             *   shape: "rectangle"
+             *   volumeInfo: "100_100_70_70_0
+             */
+            Img = getPicByPicName(this.state.logo)
+            curRenderBother = computedCurRenderBother(this.state.logo)
+        } else {
+            Img = window.resources[curRenderBother.name]
+        }
         const xywhs = getXYWHSByString(curRenderBother.volumeInfo)
         const centerOriginxy = getCenterOriginByString(curRenderBother.centerOrigin)
         const imgSize = getCenterOriginByString(curRenderBother.imgSizeInfo)
+        const offset = getOffsetXYByString(curRenderBother.offset || "")
         if (curRenderBother) {
             this.curRender.curFrameInfo = curRenderBother
             
@@ -423,7 +440,7 @@ class Role {
 
             let renderXInCanvas = Math.round(x - centerOriginxy.x)
             let renderYInCanvas = Math.round(y - centerOriginxy.y)
-            ctx.drawImage(Img, 0, 0,imgSize.x, imgSize.y, renderXInCanvas, renderYInCanvas, imgSize.x, imgSize.y)
+            ctx.drawImage(Img, offset.x, offset.y,imgSize.x, imgSize.y, renderXInCanvas, renderYInCanvas, imgSize.x, imgSize.y)
 
             if (debug) {
                 // 体积描边
@@ -635,21 +652,18 @@ loadInitResources(() => {
         gameNew.getFPS()
     }, 1000);
 
-    setTimeout(() => {
-        gameNew.resetMainViewportPosition()
-        userNew
-        .addPosition({ x: 200 + 200, y: 200 + 200, z: 0 })
-        .addAction('action', walking, { needTrigger: true, codeDownTime: 0 })
-        .addAction('attackAction', attackAction, { needTrigger: true, codeDownTime: 0 })
-        .addExtraRenderInfo(createName)
-        // monster_01_new.addPosition({ x: 200 + Math.random() * 500, y: 0 + Math.random() * 500, z: 0 })
-        // .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0 })
-        // .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
-        gameNew.addNewHero(userNew)
-        // gameNew.addNewHero(userNew).addNewMonster(monster_01_new)
+    gameNew.resetMainViewportPosition()
+    userNew
+    .addPosition({ x: 200 + 200, y: 200 + 200, z: 0 })
+    .addAction('action', walking, { needTrigger: true, codeDownTime: 0 })
+    .addAction('attackAction', attackAction, { needTrigger: true, codeDownTime: 0 })
+    .addExtraRenderInfo(createName)
+    // monster_01_new.addPosition({ x: 200 + Math.random() * 500, y: 0 + Math.random() * 500, z: 0 })
+    // .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0 })
+    // .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
+    gameNew.addNewHero(userNew)
+    // gameNew.addNewHero(userNew).addNewMonster(monster_01_new)
         
-    }, 2000);
-
     setInterval(() => {
         gameNew.addNewMonster(
             new Role(Math.random() > 0.5 ? monster_01 : monster_02)
