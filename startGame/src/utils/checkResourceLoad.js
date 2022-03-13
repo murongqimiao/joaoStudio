@@ -74,26 +74,38 @@ const loadXml = (file) => {
         xmlDoc=new ActiveXObject("Microsoft.XMLDOM");  
         xmlDoc.async=false;  
         xmlDoc.load(file);  
+        parseXml(xmlDoc, name)
     } catch(e) {  
         try //Firefox, Mozilla, Opera, etc.  
         {  
             xmlDoc=document.implementation.createDocument("","",null);  
             xmlDoc.async=false;  
             xmlDoc.load(file);  
+            parseXml(xmlDoc, name)
         } catch(e) {  
             try //Google Chrome  
             {  
                 var xmlhttp = new window.XMLHttpRequest();  
-                xmlhttp.open("GET",file,false);  
+                xmlhttp.open("GET",file,);  
+                // 如果已指明，responseType 必须是空字符串或 "document"
+                xmlhttp.responseType = 'document';
+                // overrideMimeType() 用来强制解析 response 为 XML
+                xmlhttp.overrideMimeType('text/xml');
+                xmlhttp.onload = function () {
+                  if (xmlhttp.readyState === xmlhttp.DONE) {
+                    if (xmlhttp.status === 200) {
+                      xmlDoc = xmlhttp.responseXML.documentElement;
+                      parseXml(xmlDoc, name)
+                    }
+                  }
+                };
                 xmlhttp.send(null);  
-                xmlDoc = xmlhttp.responseXML.documentElement;
             } catch(e) {  
                 console.log("err", e)
             }  
         }  
     }
     let name = file.split('/').pop()
-    parseXml(xmlDoc, name)
 }
 
 const parseXml = (xmlDoc, name) => {

@@ -166,7 +166,6 @@ const generateFrameList = (params) => {
                         imgSizeInfo,
                         shape
                     })
-                    console.log(frameItem)
                     
                 }
             }
