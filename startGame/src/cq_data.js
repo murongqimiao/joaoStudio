@@ -829,6 +829,14 @@ export const materials = {
           isMonster: false,
           name: "金币",
           desc: "掉落的金币, 为什么怪物会掉落金币呢, 这至今是个谜。"
+      },
+      onCrash: function () {
+        const [self, crashItem] = arguments
+        if (crashItem.state.isHero) { // 金币可以被hero拾取
+          window.__game.removeMonster(self)
+          // hero 属性中金币添加对应数量
+       
+        }
       }
     },
     // 斧子掉落形态
