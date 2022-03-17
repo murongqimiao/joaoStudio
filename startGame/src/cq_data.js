@@ -1,5 +1,6 @@
 import { getFaceToDirection } from "./utils/collisionDetection"
 import { attackEvent } from "./utils/attackEvent"
+import { throwD6 } from "./utils/random"
 
 /**
  * generate by cq resource
@@ -285,6 +286,24 @@ export const user = {
         codeDownTime: {
             attack: 100
         },
+        drop: {
+          throwD6: 2, // throw d6 times
+          result: {
+            '10': 'g_icon_money4',
+            '11': 'g_icon_money4',
+            '12': 'g_icon_money4',
+            '13': 'g_icon_money4',
+            '14': 'g_icon_money4',
+            '15': 'g_icon_money4',
+            '16': 'g_icon_money4',
+            '20': 'g_icon_money4',
+            '21': 'g_icon_money4',
+            '22': 'g_icon_money4',
+            '23': 'g_icon_money4',
+            '24': 'g_icon_money4',
+            '25': 'g_icon_money4',
+          }
+        }
     },
     skill: {
         cd: CONSTANT_COMMON.BASE_ONE_SECOND
@@ -326,7 +345,19 @@ export const user = {
         }
     },
     onDead: function (game, monster) {
-      const { position } = monster
+      const { position, state } = monster
+      const { drop } = state
+      let dropName = null
+      let throwD6Result = ''
+      if (drop.throwD6) {
+        for (let i = 0; i < drop.throwD6; i++) {
+          throwD6Result += (throwD6() + '')
+        }
+        dropName = drop.result[throwD6Result] || ''
+      }
+      console.log("==========dropName========")
+      console.log(throwD6Result)
+      if (!dropName) return
       game.addNewMonster(
         new window.__Role(materials['g_icon_money4'])
         .addPosition({
