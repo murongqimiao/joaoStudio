@@ -116,6 +116,23 @@ export const MAP_REMORA = {
    }] 
 }
 
+const recoverStateFunc = function () {
+  const [self, crashItem] = arguments
+  if (crashItem.state.isHero) {
+    window.__game.removeMonster(self)
+    // 恢复hero血量
+    if (crashItem.state[this.state.maxRecoverKey] && crashItem.state[this.state.recoverKey]) {
+      let variation = Math.floor(crashItem.state.maxHp * this.state.recoverAmount)
+      console.log("variation", variation)
+      if (crashItem.state[this.state.recoverKey] + variation > crashItem.state[this.state.maxRecoverKey]) {
+        crashItem.state[this.state.recoverKey] = crashItem.state[this.state.maxRecoverKey] // full hp 
+      } else {
+        crashItem.state[this.state.recoverKey] += variation
+      }
+    }
+  }
+}
+
 /**
  * generate frame list by params 
  * @param {*} params
@@ -176,6 +193,28 @@ const generateFrameList = (params) => {
     return result
 }
 
+const monsterDrop = function (game, monster) {
+  const { position, state } = monster
+  const { drop } = state
+  let dropName = null
+  let throwD6Result = ''
+  if (drop.throwD6) {
+    for (let i = 0; i < drop.throwD6; i++) {
+      throwD6Result += (throwD6() + '')
+    }
+    dropName = drop.result[throwD6Result] || ''
+  }
+  console.log('===========dropName==========', dropName)
+  if (!dropName) return
+  game.addNewMonster(
+    // new window.__Role(materials[dropName])
+    new window.__Role(materials['0001'])
+    .addPosition({
+      x: Math.floor(position.x),
+      y: Math.floor(position.y)
+    })
+  )
+}
 
 /**
  * main role info  {}
@@ -302,6 +341,18 @@ export const user = {
             '23': 'g_icon_money4',
             '24': 'g_icon_money4',
             '25': 'g_icon_money4',
+            '30': '0001',
+            '31': '0001',
+            '32': '0001',
+            '33': '0002',
+            '34': '0002',
+            '35': '0003',
+            '40': '0004',
+            '41': '0004',
+            '42': '0004',
+            '43': '0005',
+            '44': '0005',
+            '45': '0006',
           }
         }
     },
@@ -344,28 +395,7 @@ export const user = {
             }
         }
     },
-    onDead: function (game, monster) {
-      const { position, state } = monster
-      const { drop } = state
-      let dropName = null
-      let throwD6Result = ''
-      if (drop.throwD6) {
-        for (let i = 0; i < drop.throwD6; i++) {
-          throwD6Result += (throwD6() + '')
-        }
-        dropName = drop.result[throwD6Result] || ''
-      }
-      console.log("==========dropName========")
-      console.log(throwD6Result)
-      if (!dropName) return
-      game.addNewMonster(
-        new window.__Role(materials['g_icon_money4'])
-        .addPosition({
-          x: Math.floor(position.x),
-          y: Math.floor(position.y)
-        })
-      )
-    }
+    onDead: monsterDrop
 }
 
 /**
@@ -401,7 +431,37 @@ export const user = {
         codeDownTime: {
             attack: 100
         },
-        defaultEvent: '0_stand'
+        defaultEvent: '0_stand',
+        drop: {
+          throwD6: 2, // throw d6 times
+          result: {
+            '10': 'g_icon_money4',
+            '11': 'g_icon_money4',
+            '12': 'g_icon_money4',
+            '13': 'g_icon_money4',
+            '14': 'g_icon_money4',
+            '15': 'g_icon_money4',
+            '16': 'g_icon_money4',
+            '20': 'g_icon_money4',
+            '21': 'g_icon_money4',
+            '22': 'g_icon_money4',
+            '23': 'g_icon_money4',
+            '24': 'g_icon_money4',
+            '25': 'g_icon_money4',
+            '30': '0001',
+            '31': '0001',
+            '32': '0001',
+            '33': '0002',
+            '34': '0002',
+            '35': '0003',
+            '40': '0004',
+            '41': '0004',
+            '42': '0004',
+            '43': '0005',
+            '44': '0005',
+            '45': '0006',
+          }
+        }
     },
     skill: {
         cd: CONSTANT_COMMON.BASE_ONE_SECOND
@@ -443,6 +503,7 @@ export const user = {
         })
       )
     },
+    onDead: monsterDrop,
     onCrash: function () {
         const [self, crashItem] = arguments
         if (crashItem.state.isSolid) {
@@ -753,48 +814,72 @@ export const materials = {
         role: {
             logo: '1.png',
             isSprite: true,
-            isMonster: false
-        }
+            isMonster: false,
+            recoverAmount: 1/3,
+            maxRecoverKey: 'maxHp', 
+            recoverKey: 'hp',
+        },
+        onCrash: recoverStateFunc
     },
     // 中红瓶
     '0002': {
       role: {
           logo: '2.png',
           isSprite: true,
-          isMonster: false
-      }
+          isMonster: false,
+          recoverAmount: 2/3,
+          maxRecoverKey: 'maxHp', 
+          recoverKey: 'hp',
+      },
+      onCrash: recoverStateFunc
     },
     // 大红瓶
     '0003': {
       role: {
           logo: '3.png',
           isSprite: true,
-          isMonster: false
-      }
+          isMonster: false,
+          recoverAmount: 3/3,
+          maxRecoverKey: 'maxHp', 
+          recoverKey: 'hp',
+      },
+      onCrash: recoverStateFunc
     },
     // 小蓝瓶
     '0004': {
       role: {
           logo: '4.png',
           isSprite: true,
-          isMonster: false
-      }
+          isMonster: false,
+          recoverAmount: 1/3,
+          maxRecoverKey: 'maxMp', 
+          recoverKey: 'mp',
+      },
+      onCrash: recoverStateFunc
     },
     // 中蓝瓶
     '0005': {
       role: {
           logo: '5.png',
           isSprite: true,
-          isMonster: false
-      }
+          isMonster: false,
+          recoverAmount: 2/3,
+          maxRecoverKey: 'maxMp', 
+          recoverKey: 'mp',
+      },
+      onCrash: recoverStateFunc
     },
     // 大蓝瓶
     '0006': {
       role: {
           logo: '6.png',
           isSprite: true,
-          isMonster: false
-      }
+          isMonster: false,
+          recoverAmount: 3/3,
+          maxRecoverKey: 'maxMp', 
+          recoverKey: 'mp',
+      },
+      onCrash: recoverStateFunc
     },
      // 小蓝瓶
      '0007': {
@@ -940,3 +1025,4 @@ export const materials = {
       }
     },
 }
+
