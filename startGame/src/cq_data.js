@@ -11,7 +11,8 @@ export const CONSTANT_COMMON = {
         new_dco005: '199_234',
         new_ms001: '152_178',
         new_ms002: '224_245',
-        new_jn10020: '374_438'
+        new_jn10020: '374_438',
+        new_jn10234: '253_319',
     },
     COMMON_VOLUME_SIZE: {
         new_dco004: '75_85_40_40_1',
@@ -27,6 +28,16 @@ export const CONSTANT_COMMON = {
             '100_230_70_70_0',
             '100_150_70_70_0',
             '100_100_70_70_0'
+        ],
+        new_jn10234: [
+            '90_105_30_30_0',
+            '90_105_30_30_0',
+            '90_105_30_30_0',
+            '90_105_30_30_0',
+            '90_105_30_30_0',
+            '90_105_30_30_0',
+            '90_105_30_30_0',
+            '90_105_30_30_0',
         ]
     },
     COMMON_ORIGIN_CENTER: {
@@ -34,10 +45,12 @@ export const CONSTANT_COMMON = {
         new_dco005: '100_117',
         new_ms001: '78_120',
         new_ms002: '108_140',
-        new_jn10020: '187_219'
+        new_jn10020: '187_219',
+        new_jn10234:  '-95_100',
     },
     SKILL_POSITION: { // 技能位置相对于人物当前方向的位移
-        skill_01: ['0_0', '0_0', '0_0', '0_0', '0_0', '0_0', '0_0', '0_0']
+        skill_01: ['0_0', '0_0', '0_0', '0_0', '0_0', '0_0', '0_0', '0_0'],
+        skill_02: ['-190_-70', '-130_-70', '-120_-50', '-130_10', '-190_10', '-250_10', '-240_-50', '-230_-80'],
     },
     BASE_HERO_HP: 3,
     BASE_HERO_ATK: 1,
@@ -95,7 +108,8 @@ const CONSTANT_IMG = {
     new_dco005: 'new_dco005',
     new_ms001: 'new_ms001',
     new_ms002: 'new_ms002',
-    new_jn10020: 'new_jn10020'
+    new_jn10020: 'new_jn10020',
+    new_jn10234: 'new_jn10234',
 }
 
 export const MAP_REMORA = {
@@ -563,6 +577,73 @@ export const skill_01 = {
     
 }
 
+export const skill_02 = {
+  state: {
+      name: CONSTANT_IMG.new_jn10234,
+      positionWidthHero: CONSTANT_COMMON.SKILL_POSITION.skill_02,
+      atk: CONSTANT_COMMON.BASE_HERO_ATK,
+      acceleratedSpeed: 0.2,
+      origin: null,
+  },
+  framesList: generateFrameList({
+      name: CONSTANT_IMG.new_jn10234,
+      type: 'skill',
+      standTime: 5,
+      standFrame: 7,
+      imgSizeInfo: CONSTANT_COMMON.COMMON_IMG_SIZE[CONSTANT_IMG['new_jn10234']],
+      volumeInfo: CONSTANT_COMMON.COMMON_VOLUME_SIZE[CONSTANT_IMG['new_jn10234']],
+      centerOrigin: CONSTANT_COMMON.COMMON_ORIGIN_CENTER[CONSTANT_IMG['new_jn10234']],
+      shape: 'circle'
+  }),
+  timeReduceInfo : {
+    needTrigger: true, codeDownTime: 0, deadTime: 5, leaveHands: true
+  },
+  onSkillAdd: function() {
+  },
+  update: function () {
+    // skill 02 将沿着直线前进, 首先确定一个方向, 然后根据 S = 1/2 * a * t^ 来进行计算
+    const [item] = arguments
+    if (!item.origin) {
+      item.origin = JSON.parse(JSON.stringify(item.position)) // 深拷贝一份当前位置用来做位移参考
+    }
+    if (!item.leftTime) {
+      item.leftTime = 20
+    } else {
+      item.leftTime++
+    }
+    let direction = item.curEvent.slice(0,1)
+    let variation = Math.floor(1/2 * item.state.acceleratedSpeed * item.leftTime * item.leftTime)
+    let slantVariation = Math.floor(variation / 1.41)
+    let variationX = [0, 1 * slantVariation, variation, 1 * slantVariation, 0, -1 * slantVariation, -1 * variation, -1 * slantVariation][direction]// x轴的变化量
+    let variationY = [-1 * variation, -1 * slantVariation, 0, 1 * slantVariation, 1 * variation, 1 * slantVariation, 0, -1 * slantVariation][direction] // y 轴的变化量
+    item.position.x = item.origin.x + variationX
+    item.position.y = item.origin.y + variationY
+  },
+  onCrash: function() {
+      const [skillItem, crashItem, game] = arguments
+      // if (
+      //     skillItem.curRender.curFrameImgIndex === 3
+      //     // skillItem.curRender.curFrame === 0 // when computed crash with  第5帧动画开始计算有效伤害
+      // ) {
+      //     if (crashItem.state.isMonster) {
+      //         let direction = getFaceToDirection({
+      //             x1: crashItem.position.x,
+      //             y1: crashItem.position.y,
+      //             x2: skillItem.position.x,
+      //             y2: skillItem.position.y
+      //         })
+
+      //         // exec attack action
+      //         if (crashItem.curEvent.includes('death')) { return }
+      //         attackEvent(skillItem, crashItem, 'normal')
+      //         crashItem.resetFrameInfo(`${direction}_hit`)
+      //         crashItem.addFrameEndEvent(crashItem.recoverFrameInfo.bind(crashItem))
+      //     }
+      // }
+  }
+  
+}
+
 /**
  * action info {}
  * 
@@ -588,8 +669,12 @@ export const skill_01 = {
         ['I', 'K'].forEach(key => computedKeyList.splice(computedKeyList.indexOf(key)))
     }
     if (computedKeyList.length) {
-        const check = (list) => {
-            return list.map(v => computedKeyList.includes(v)).every(v => v)
+        const check = (list, ifOne) => {
+            if (ifOne) {
+              return list.map(v => computedKeyList.includes(v)).some(v => v)
+            } else {
+              return list.map(v => computedKeyList.includes(v)).every(v => v)
+            }
         }
         const hasInBuffer = (list) => {
             return list.map(v => computedKeyListBuffer.includes(v)).some(v => v)
@@ -612,8 +697,13 @@ export const skill_01 = {
         } else if (check(['L'])) {
             direct = '2_run' + (hasInBuffer(['L']) ? '' : '')
         }
-        if (check(['D'])) {
+        if (check(['D'], true)) {
             direct = this.curEvent.slice(0, 1) + '_attack'
+            this.skill.current = 'skill_01'
+        }
+        if (check(['S'], true)) {
+            direct = this.curEvent.slice(0, 1) + '_attack'
+            this.skill.current = 'skill_02'
         }
         // 单次执行动作, 如攻击,一次性技能
     }

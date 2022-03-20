@@ -1,5 +1,5 @@
 // import { footMan, Monster01, goldCoinInMap, walking, getImageFromX_Y, CONSTANT_COMMON } from "./data"
-import { monster_01, monster_02, materials, user, walking, monsterEventHandler, skill_01, MAP_REMORA, createName, showHp } from "./cq_data"
+import { monster_01, monster_02, materials, user, walking, monsterEventHandler, skill_01, skill_02, MAP_REMORA, createName, showHp } from "./cq_data"
 import { collisionDetection, getBulkBorder, getXYWHSByString, getCenterOriginByString, getOffsetXYByString } from "./utils/collisionDetection"
 import { loadInitResources, getPicByPicName, computedCurRenderBother } from "./utils/checkResourceLoad"
 import { drawDot, drawPolygon, scalePoints, regressOrigin, flatArr } from "./utils/canvasTool"
@@ -56,7 +56,9 @@ class Game {
         const that = this;
         // 绘制地图
         drawMap({ ctx, mainViewportPosition: this.mainViewportPosition })
-
+        
+        // update skillItem
+        this.skillList.forEach(v => v.update && v.update(v))
         // 执行行为
         let needUpdate = false
         this.allRenderList.forEach((v, index) => {
@@ -510,10 +512,13 @@ class Skill {
     state = {}
     position = {}
     curRender = {}
+    timeReduceInfo = {}
     constructor(props) {
         this.state = props.state
         this.framesList = props.framesList
         this.onCrash = props.onCrash || null
+        this.timeReduceInfo = props.timeReduceInfo || {}
+        this.update = props.update || null
     }
     addPosition(params) {
         const { x, y, z = 0, yRegression = 0 } = params;
@@ -586,22 +591,37 @@ class Skill {
             const { x, y } = getMainViewportPostion(this.position)
             let renderXInCanvas = Math.round(x - centerOriginxy.x)
             let renderYInCanvas = Math.round(y - centerOriginxy.y)
-            ctx.drawImage(Img, 0, 0,imgSize.x, imgSize.y, renderXInCanvas, renderYInCanvas, imgSize.x, imgSize.y)
-
-            if (debug) {
-                // 体积描边
-                const borderData = getBulkBorder(this, xywhs, centerOriginxy, imgSize);
-                switch (this.curRender.curFrameInfo.shape) {
-                    case 'rectangle':
-                        drawPolygon({ ctx, color: 'blue' }, borderData);
-                        break;
-                    case 'circle':
-                        drawDot({ ctx }, borderData)
-                        break;
-                    default: () => { }
-                }
-                drawDot({ ctx, color: 'yellow' }, [this.position.x, this.position.y, 1] )
+            try {
+              ctx.drawImage(Img, 0, 0,imgSize.x, imgSize.y, renderXInCanvas, renderYInCanvas, imgSize.x, imgSize.y)
+              if (debug) {
+                // 绘制图形的真实位置
+                drawPolygon({ ctx, color: 'blue' }, [renderXInCanvas,
+                  renderYInCanvas,
+                  renderXInCanvas,
+                  renderYInCanvas + imgSize.y,
+                  renderXInCanvas + imgSize.x,
+                  renderYInCanvas + imgSize.y,
+                  renderXInCanvas + imgSize.x,
+                  renderYInCanvas]);
+              }
+            } catch (err) {
+              console.log(err, Img, curRenderBother.name)
             }
+
+            // if (debug) {
+            //     // 体积描边
+            //     const borderData = getBulkBorder(this, xywhs, centerOriginxy, imgSize);
+            //     switch (this.curRender.curFrameInfo.shape) {
+            //         case 'rectangle':
+            //             drawPolygon({ ctx, color: 'blue' }, borderData);
+            //             break;
+            //         case 'circle':
+            //             drawDot({ ctx }, borderData)
+            //             break;
+            //         default: () => { }
+            //     }
+            //     drawDot({ ctx, color: 'yellow' }, [this.position.x, this.position.y, 1] )
+            // }
         }
         
         return this
@@ -633,7 +653,7 @@ class Skill {
 const userNew = new Role(user)
 const monster_01_new = new Role(monster_02)
 const gameNew = new Game()
-window.skill_list = { skill_01 } 
+window.skill_list = { skill_01, skill_02 } 
 window.__game = gameNew
 window.__Role = Role
 window.__Skill = Skill
@@ -664,15 +684,15 @@ loadInitResources(() => {
     gameNew.addNewHero(userNew)
     // gameNew.addNewHero(userNew).addNewMonster(monster_01_new)
         
-    setInterval(() => {
-        gameNew.addNewMonster(
-            new Role(Math.random() > 0.5 ? monster_01 : monster_02)
-            .addPosition({ x: Math.random()*1000, y: Math.random() * 700, z: 0 })
-            .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0})
-            .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
-            .addExtraRenderInfo(showHp)
-        )
-    }, 2000);
+    // setInterval(() => {
+    //     gameNew.addNewMonster(
+    //         new Role(Math.random() > 0.5 ? monster_01 : monster_02)
+    //         .addPosition({ x: Math.random()*1000, y: Math.random() * 700, z: 0 })
+    //         .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0})
+    //         .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
+    //         .addExtraRenderInfo(showHp)
+    //     )
+    // }, 2000);
 
 })
 

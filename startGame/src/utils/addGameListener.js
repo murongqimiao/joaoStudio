@@ -6,6 +6,9 @@ export const addGameListener = (gameNew) => {
             case 74: // J
                 gameNew.keyActiveCollect('add', 'J')
                 break;
+            case 83: // S
+                gameNew.keyActiveCollect('add', 'S')
+                break;
             case 40:
             case 75: // K
                 gameNew.keyActiveCollect('add', 'K')
@@ -29,6 +32,9 @@ export const addGameListener = (gameNew) => {
             case 37:
             case 74: // J
                 gameNew.keyActiveCollect('remove', 'J')
+                break;
+            case 83: // S
+                gameNew.keyActiveCollect('remove', 'S')
                 break;
             case 40:
             case 75: // K
