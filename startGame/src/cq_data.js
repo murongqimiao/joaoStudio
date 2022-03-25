@@ -1,5 +1,6 @@
 import { getFaceToDirection } from "./utils/collisionDetection"
 import { attackEvent } from "./utils/attackEvent"
+import { throwD6 } from "./utils/random"
 
 /**
  * generate by cq resource
@@ -10,7 +11,8 @@ export const CONSTANT_COMMON = {
         new_dco005: '199_234',
         new_ms001: '152_178',
         new_ms002: '224_245',
-        new_jn10020: '374_438'
+        new_jn10020: '374_438',
+        new_jn10234: '253_319',
     },
     COMMON_VOLUME_SIZE: {
         new_dco004: '75_85_40_40_1',
@@ -26,6 +28,16 @@ export const CONSTANT_COMMON = {
             '100_230_70_70_0',
             '100_150_70_70_0',
             '100_100_70_70_0'
+        ],
+        new_jn10234: [
+            '90_105_30_30_0',
+            '90_105_30_30_0',
+            '90_105_30_30_0',
+            '90_105_30_30_0',
+            '90_105_30_30_0',
+            '90_105_30_30_0',
+            '90_105_30_30_0',
+            '90_105_30_30_0',
         ]
     },
     COMMON_ORIGIN_CENTER: {
@@ -33,10 +45,12 @@ export const CONSTANT_COMMON = {
         new_dco005: '100_117',
         new_ms001: '78_120',
         new_ms002: '108_140',
-        new_jn10020: '187_219'
+        new_jn10020: '187_219',
+        new_jn10234:  '-95_100',
     },
     SKILL_POSITION: { // 技能位置相对于人物当前方向的位移
-        skill_01: ['0_0', '0_0', '0_0', '0_0', '0_0', '0_0', '0_0', '0_0']
+        skill_01: ['0_0', '0_0', '0_0', '0_0', '0_0', '0_0', '0_0', '0_0'],
+        skill_02: ['-190_-70', '-130_-70', '-120_-50', '-130_10', '-190_10', '-250_10', '-240_-50', '-230_-80'],
     },
     BASE_HERO_HP: 3,
     BASE_HERO_ATK: 1,
@@ -94,7 +108,8 @@ const CONSTANT_IMG = {
     new_dco005: 'new_dco005',
     new_ms001: 'new_ms001',
     new_ms002: 'new_ms002',
-    new_jn10020: 'new_jn10020'
+    new_jn10020: 'new_jn10020',
+    new_jn10234: 'new_jn10234',
 }
 
 export const MAP_REMORA = {
@@ -113,6 +128,23 @@ export const MAP_REMORA = {
         ],
        type: 'in'
    }] 
+}
+
+const recoverStateFunc = function () {
+  const [self, crashItem] = arguments
+  if (crashItem.state.isHero) {
+    window.__game.removeMonster(self)
+    // 恢复hero血量
+    if (crashItem.state[this.state.maxRecoverKey] && crashItem.state[this.state.recoverKey]) {
+      let variation = Math.floor(crashItem.state.maxHp * this.state.recoverAmount)
+      console.log("variation", variation)
+      if (crashItem.state[this.state.recoverKey] + variation > crashItem.state[this.state.maxRecoverKey]) {
+        crashItem.state[this.state.recoverKey] = crashItem.state[this.state.maxRecoverKey] // full hp 
+      } else {
+        crashItem.state[this.state.recoverKey] += variation
+      }
+    }
+  }
 }
 
 /**
@@ -175,6 +207,28 @@ const generateFrameList = (params) => {
     return result
 }
 
+const monsterDrop = function (game, monster) {
+  const { position, state } = monster
+  const { drop } = state
+  let dropName = null
+  let throwD6Result = ''
+  if (drop.throwD6) {
+    for (let i = 0; i < drop.throwD6; i++) {
+      throwD6Result += (throwD6() + '')
+    }
+    dropName = drop.result[throwD6Result] || ''
+  }
+  console.log('===========dropName==========', dropName)
+  if (!dropName) return
+  game.addNewMonster(
+    // new window.__Role(materials[dropName])
+    new window.__Role(materials['0001'])
+    .addPosition({
+      x: Math.floor(position.x),
+      y: Math.floor(position.y)
+    })
+  )
+}
 
 /**
  * main role info  {}
@@ -285,6 +339,36 @@ export const user = {
         codeDownTime: {
             attack: 100
         },
+        drop: {
+          throwD6: 2, // throw d6 times
+          result: {
+            '10': 'g_icon_money4',
+            '11': 'g_icon_money4',
+            '12': 'g_icon_money4',
+            '13': 'g_icon_money4',
+            '14': 'g_icon_money4',
+            '15': 'g_icon_money4',
+            '16': 'g_icon_money4',
+            '20': 'g_icon_money4',
+            '21': 'g_icon_money4',
+            '22': 'g_icon_money4',
+            '23': 'g_icon_money4',
+            '24': 'g_icon_money4',
+            '25': 'g_icon_money4',
+            '30': '0001',
+            '31': '0001',
+            '32': '0001',
+            '33': '0002',
+            '34': '0002',
+            '35': '0003',
+            '40': '0004',
+            '41': '0004',
+            '42': '0004',
+            '43': '0005',
+            '44': '0005',
+            '45': '0006',
+          }
+        }
     },
     skill: {
         cd: CONSTANT_COMMON.BASE_ONE_SECOND
@@ -325,16 +409,7 @@ export const user = {
             }
         }
     },
-    onDead: function (game, monster) {
-      const { position } = monster
-      game.addNewMonster(
-        new window.__Role(materials['g_icon_money4'])
-        .addPosition({
-          x: Math.floor(position.x),
-          y: Math.floor(position.y)
-        })
-      )
-    }
+    onDead: monsterDrop
 }
 
 /**
@@ -370,7 +445,37 @@ export const user = {
         codeDownTime: {
             attack: 100
         },
-        defaultEvent: '0_stand'
+        defaultEvent: '0_stand',
+        drop: {
+          throwD6: 2, // throw d6 times
+          result: {
+            '10': 'g_icon_money4',
+            '11': 'g_icon_money4',
+            '12': 'g_icon_money4',
+            '13': 'g_icon_money4',
+            '14': 'g_icon_money4',
+            '15': 'g_icon_money4',
+            '16': 'g_icon_money4',
+            '20': 'g_icon_money4',
+            '21': 'g_icon_money4',
+            '22': 'g_icon_money4',
+            '23': 'g_icon_money4',
+            '24': 'g_icon_money4',
+            '25': 'g_icon_money4',
+            '30': '0001',
+            '31': '0001',
+            '32': '0001',
+            '33': '0002',
+            '34': '0002',
+            '35': '0003',
+            '40': '0004',
+            '41': '0004',
+            '42': '0004',
+            '43': '0005',
+            '44': '0005',
+            '45': '0006',
+          }
+        }
     },
     skill: {
         cd: CONSTANT_COMMON.BASE_ONE_SECOND
@@ -412,6 +517,7 @@ export const user = {
         })
       )
     },
+    onDead: monsterDrop,
     onCrash: function () {
         const [self, crashItem] = arguments
         if (crashItem.state.isSolid) {
@@ -471,6 +577,73 @@ export const skill_01 = {
     
 }
 
+export const skill_02 = {
+  state: {
+      name: CONSTANT_IMG.new_jn10234,
+      positionWidthHero: CONSTANT_COMMON.SKILL_POSITION.skill_02,
+      atk: CONSTANT_COMMON.BASE_HERO_ATK,
+      acceleratedSpeed: 0.2,
+      origin: null,
+  },
+  framesList: generateFrameList({
+      name: CONSTANT_IMG.new_jn10234,
+      type: 'skill',
+      standTime: 5,
+      standFrame: 7,
+      imgSizeInfo: CONSTANT_COMMON.COMMON_IMG_SIZE[CONSTANT_IMG['new_jn10234']],
+      volumeInfo: CONSTANT_COMMON.COMMON_VOLUME_SIZE[CONSTANT_IMG['new_jn10234']],
+      centerOrigin: CONSTANT_COMMON.COMMON_ORIGIN_CENTER[CONSTANT_IMG['new_jn10234']],
+      shape: 'circle'
+  }),
+  timeReduceInfo : {
+    needTrigger: true, codeDownTime: 0, deadTime: 5, leaveHands: true
+  },
+  onSkillAdd: function() {
+  },
+  update: function () {
+    // skill 02 将沿着直线前进, 首先确定一个方向, 然后根据 S = 1/2 * a * t^ 来进行计算
+    const [item] = arguments
+    if (!item.origin) {
+      item.origin = JSON.parse(JSON.stringify(item.position)) // 深拷贝一份当前位置用来做位移参考
+    }
+    if (!item.leftTime) {
+      item.leftTime = 20
+    } else {
+      item.leftTime++
+    }
+    let direction = item.curEvent.slice(0,1)
+    let variation = Math.floor(1/2 * item.state.acceleratedSpeed * item.leftTime * item.leftTime)
+    let slantVariation = Math.floor(variation / 1.41)
+    let variationX = [0, 1 * slantVariation, variation, 1 * slantVariation, 0, -1 * slantVariation, -1 * variation, -1 * slantVariation][direction]// x轴的变化量
+    let variationY = [-1 * variation, -1 * slantVariation, 0, 1 * slantVariation, 1 * variation, 1 * slantVariation, 0, -1 * slantVariation][direction] // y 轴的变化量
+    item.position.x = item.origin.x + variationX
+    item.position.y = item.origin.y + variationY
+  },
+  onCrash: function() {
+      const [skillItem, crashItem, game] = arguments
+      // if (
+      //     skillItem.curRender.curFrameImgIndex === 3
+      //     // skillItem.curRender.curFrame === 0 // when computed crash with  第5帧动画开始计算有效伤害
+      // ) {
+      //     if (crashItem.state.isMonster) {
+      //         let direction = getFaceToDirection({
+      //             x1: crashItem.position.x,
+      //             y1: crashItem.position.y,
+      //             x2: skillItem.position.x,
+      //             y2: skillItem.position.y
+      //         })
+
+      //         // exec attack action
+      //         if (crashItem.curEvent.includes('death')) { return }
+      //         attackEvent(skillItem, crashItem, 'normal')
+      //         crashItem.resetFrameInfo(`${direction}_hit`)
+      //         crashItem.addFrameEndEvent(crashItem.recoverFrameInfo.bind(crashItem))
+      //     }
+      // }
+  }
+  
+}
+
 /**
  * action info {}
  * 
@@ -496,8 +669,12 @@ export const skill_01 = {
         ['I', 'K'].forEach(key => computedKeyList.splice(computedKeyList.indexOf(key)))
     }
     if (computedKeyList.length) {
-        const check = (list) => {
-            return list.map(v => computedKeyList.includes(v)).every(v => v)
+        const check = (list, ifOne) => {
+            if (ifOne) {
+              return list.map(v => computedKeyList.includes(v)).some(v => v)
+            } else {
+              return list.map(v => computedKeyList.includes(v)).every(v => v)
+            }
         }
         const hasInBuffer = (list) => {
             return list.map(v => computedKeyListBuffer.includes(v)).some(v => v)
@@ -520,8 +697,13 @@ export const skill_01 = {
         } else if (check(['L'])) {
             direct = '2_run' + (hasInBuffer(['L']) ? '' : '')
         }
-        if (check(['D'])) {
+        if (check(['D'], true)) {
             direct = this.curEvent.slice(0, 1) + '_attack'
+            this.skill.current = 'skill_01'
+        }
+        if (check(['S'], true)) {
+            direct = this.curEvent.slice(0, 1) + '_attack'
+            this.skill.current = 'skill_02'
         }
         // 单次执行动作, 如攻击,一次性技能
     }
@@ -722,48 +904,72 @@ export const materials = {
         role: {
             logo: '1.png',
             isSprite: true,
-            isMonster: false
-        }
+            isMonster: false,
+            recoverAmount: 1/3,
+            maxRecoverKey: 'maxHp', 
+            recoverKey: 'hp',
+        },
+        onCrash: recoverStateFunc
     },
     // 中红瓶
     '0002': {
       role: {
           logo: '2.png',
           isSprite: true,
-          isMonster: false
-      }
+          isMonster: false,
+          recoverAmount: 2/3,
+          maxRecoverKey: 'maxHp', 
+          recoverKey: 'hp',
+      },
+      onCrash: recoverStateFunc
     },
     // 大红瓶
     '0003': {
       role: {
           logo: '3.png',
           isSprite: true,
-          isMonster: false
-      }
+          isMonster: false,
+          recoverAmount: 3/3,
+          maxRecoverKey: 'maxHp', 
+          recoverKey: 'hp',
+      },
+      onCrash: recoverStateFunc
     },
     // 小蓝瓶
     '0004': {
       role: {
           logo: '4.png',
           isSprite: true,
-          isMonster: false
-      }
+          isMonster: false,
+          recoverAmount: 1/3,
+          maxRecoverKey: 'maxMp', 
+          recoverKey: 'mp',
+      },
+      onCrash: recoverStateFunc
     },
     // 中蓝瓶
     '0005': {
       role: {
           logo: '5.png',
           isSprite: true,
-          isMonster: false
-      }
+          isMonster: false,
+          recoverAmount: 2/3,
+          maxRecoverKey: 'maxMp', 
+          recoverKey: 'mp',
+      },
+      onCrash: recoverStateFunc
     },
     // 大蓝瓶
     '0006': {
       role: {
           logo: '6.png',
           isSprite: true,
-          isMonster: false
-      }
+          isMonster: false,
+          recoverAmount: 3/3,
+          maxRecoverKey: 'maxMp', 
+          recoverKey: 'mp',
+      },
+      onCrash: recoverStateFunc
     },
      // 小蓝瓶
      '0007': {
@@ -909,3 +1115,4 @@ export const materials = {
       }
     },
 }
+

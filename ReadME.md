@@ -1,4 +1,6 @@
 ### try to write a game from 0 to give up
+[github体验](https://murongqimiao.github.io/joaoStudio/)
+[https://murongqimiao.github.io/joaoStudio/](https://murongqimiao.github.io/joaoStudio/)
 
 ## startGame 
     
