@@ -46,11 +46,11 @@ export const CONSTANT_COMMON = {
         new_ms001: '78_120',
         new_ms002: '108_140',
         new_jn10020: '187_219',
-        new_jn10234:  '-95_100',
+        new_jn10234:  '-95_50',
     },
     SKILL_POSITION: { // 技能位置相对于人物当前方向的位移
         skill_01: ['0_0', '0_0', '0_0', '0_0', '0_0', '0_0', '0_0', '0_0'],
-        skill_02: ['-190_-70', '-130_-70', '-120_-50', '-130_10', '-190_10', '-250_10', '-240_-50', '-230_-80'],
+        skill_02: ['-190_-120', '-130_-120', '-120_-100', '-130_-40', '-190_-40', '-250_-40', '-240_-100', '-230_-130'],
     },
     BASE_HERO_HP: 3,
     BASE_HERO_ATK: 1,
@@ -601,18 +601,22 @@ export const skill_02 = {
   onSkillAdd: function() {
   },
   update: function () {
-    // skill 02 将沿着直线前进, 首先确定一个方向, 然后根据 S = 1/2 * a * t^ 来进行计算
+    // skill 02 将沿着直线前进, 首先确定一个方向, 匀速模式使用S = v * t 加速度模式根据 S = 1/2 * a * t^ 来进行计算 
     const [item] = arguments
     if (!item.origin) {
       item.origin = JSON.parse(JSON.stringify(item.position)) // 深拷贝一份当前位置用来做位移参考
+    } else {
+      item.oldPosition = JSON.parse(JSON.stringify(item.position))
     }
+
     if (!item.leftTime) {
-      item.leftTime = 20
+      item.leftTime = 10
     } else {
       item.leftTime++
     }
     let direction = item.curEvent.slice(0,1)
-    let variation = Math.floor(1/2 * item.state.acceleratedSpeed * item.leftTime * item.leftTime)
+    // let variation = Math.floor(1/2 * item.state.acceleratedSpeed * item.leftTime * item.leftTime)
+    let variation = Math.floor(1/2 * item.state.acceleratedSpeed * item.leftTime * 50)  // 匀速运动模式
     let slantVariation = Math.floor(variation / 1.41)
     let variationX = [0, 1 * slantVariation, variation, 1 * slantVariation, 0, -1 * slantVariation, -1 * variation, -1 * slantVariation][direction]// x轴的变化量
     let variationY = [-1 * variation, -1 * slantVariation, 0, 1 * slantVariation, 1 * variation, 1 * slantVariation, 0, -1 * slantVariation][direction] // y 轴的变化量
@@ -640,6 +644,12 @@ export const skill_02 = {
       //         crashItem.addFrameEndEvent(crashItem.recoverFrameInfo.bind(crashItem))
       //     }
       // }
+  },
+  crashObstacle: function() {
+    const [skillItem, crashItem, game] = arguments
+    // 遇到障碍物悬停
+    skillItem.position = JSON.parse(JSON.stringify(skillItem.oldPosition))
+    delete skillItem.oldPosition
   }
   
 }

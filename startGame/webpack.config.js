@@ -12,7 +12,12 @@ module.exports = {
     module: { // 静态资源引入图片 加上webpack url-loader解释器
         rules: [{
             test: /.(jpg|png)$/,
-            use: ['url-loader']
+            use: {
+              loader: 'url-loader',
+              options: {
+                limit: 1,
+              }
+            }
         }, {
           test: /.list$/,
           use: ['xml-loader']

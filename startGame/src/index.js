@@ -58,7 +58,7 @@ class Game {
         drawMap({ ctx, mainViewportPosition: this.mainViewportPosition })
         
         // update skillItem
-        this.skillList.forEach(v => v.update && v.update(v))
+        this.skillList.forEach(v => { v.update && v.update(v) })
         // 执行行为
         let needUpdate = false
         this.allRenderList.forEach((v, index) => {
@@ -89,8 +89,9 @@ class Game {
                             item.curRender.curFrameInfo.volumeInfo.slice(-1) === '1') {
                             // solid crash with solid thing need back old position
                             v.position = JSON.parse(JSON.stringify(v.oldPosition))
+                            // console.log("=============v==================", v)
+                            delete v.oldPosition
                         }
-                        delete v.oldPosition
                     }
 
                     // 检测地图障碍物 mapRule [], collisionCallBack, passCallBack
@@ -100,10 +101,20 @@ class Game {
                         _checkMapRemora(mapRule,
                             v,
                             () => {
-                                v.position = JSON.parse(JSON.stringify(v.oldPosition))
-                                delete v.oldPosition
+                                // 地图障碍物碰撞
+                                if (v.state.isSolid) {
+                                  // console.log("============地图碰撞检测===========", v)
+                                  v.position = JSON.parse(JSON.stringify(v.oldPosition))
+                                  delete v.oldPosition
+                                }
+                                console.log("==========crash obstacle===========")
+                                if (v.crashObstacle) {
+                                  v.crashObstacle(v, item, this)
+                                }
                             },
-                            () => {},
+                            () => {
+                                // 地图障碍物没有发生碰撞
+                            },
                             ctx
                         )
                     }
@@ -120,7 +131,6 @@ class Game {
         if (needUpdate) {
             this.updateAllRenderList()
         }
-
 
         // 计算render的层级顺序
         this.filterRenderListByPositionY()
@@ -251,7 +261,12 @@ class Game {
 
     // 更新
     updateAllRenderList() {
-
+        // 更新时候移除已经删除的元素
+        this.skillList.forEach(v => {
+          if (v.delete) {
+            this.removeSKill(v)
+          }
+        })
         this.allRenderList = [].concat(this.monsterList).concat(this.heroList).concat(this.environmentList).concat(this.skillList).filter(v => { return !v.delete })
     }
 
@@ -519,6 +534,7 @@ class Skill {
         this.onCrash = props.onCrash || null
         this.timeReduceInfo = props.timeReduceInfo || {}
         this.update = props.update || null
+        this.crashObstacle = props.crashObstacle || null
     }
     addPosition(params) {
         const { x, y, z = 0, yRegression = 0 } = params;
@@ -608,20 +624,20 @@ class Skill {
               console.log(err, Img, curRenderBother.name)
             }
 
-            // if (debug) {
-            //     // 体积描边
-            //     const borderData = getBulkBorder(this, xywhs, centerOriginxy, imgSize);
-            //     switch (this.curRender.curFrameInfo.shape) {
-            //         case 'rectangle':
-            //             drawPolygon({ ctx, color: 'blue' }, borderData);
-            //             break;
-            //         case 'circle':
-            //             drawDot({ ctx }, borderData)
-            //             break;
-            //         default: () => { }
-            //     }
-            //     drawDot({ ctx, color: 'yellow' }, [this.position.x, this.position.y, 1] )
-            // }
+            if (debug) {
+                // 体积描边
+                const borderData = getBulkBorder(this, xywhs, centerOriginxy, imgSize);
+                switch (this.curRender.curFrameInfo.shape) {
+                    case 'rectangle':
+                        drawPolygon({ ctx, color: 'blue' }, borderData);
+                        break;
+                    case 'circle':
+                        drawDot({ ctx }, borderData)
+                        break;
+                    default: () => { }
+                }
+                drawDot({ ctx, color: 'yellow' }, [this.position.x, this.position.y, 1] )
+            }
         }
         
         return this
