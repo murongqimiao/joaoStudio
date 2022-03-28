@@ -82,7 +82,6 @@ class Game {
                     ) {
                         // has crash
                         v.onCrash && v.onCrash(v, item, this)
-                        item.onCrash && item.onCrash(item, v, this)
                         // use postion before creash occur
                         if (v.oldPosition &&
                             v.curRender.curFrameInfo.volumeInfo.slice(-1) === '1' &&
@@ -693,21 +692,21 @@ loadInitResources(() => {
     .addAction('action', walking, { needTrigger: true, codeDownTime: 0 })
     .addAction('attackAction', attackAction, { needTrigger: true, codeDownTime: 0 })
     .addExtraRenderInfo(createName)
-    // monster_01_new.addPosition({ x: 200 + Math.random() * 500, y: 0 + Math.random() * 500, z: 0 })
-    // .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0 })
-    // .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
-    gameNew.addNewHero(userNew)
-    // gameNew.addNewHero(userNew).addNewMonster(monster_01_new)
+    monster_01_new.addPosition({ x: 200 + Math.random() * 500, y: 0 + Math.random() * 500, z: 0 })
+    .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0 })
+    .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
+    // gameNew.addNewHero(userNew)
+    gameNew.addNewHero(userNew).addNewMonster(monster_01_new)
         
-    // setInterval(() => {
-    //     gameNew.addNewMonster(
-    //         new Role(Math.random() > 0.5 ? monster_01 : monster_02)
-    //         .addPosition({ x: Math.random()*1000, y: Math.random() * 700, z: 0 })
-    //         .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0})
-    //         .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
-    //         .addExtraRenderInfo(showHp)
-    //     )
-    // }, 2000);
+    setInterval(() => {
+        gameNew.addNewMonster(
+            new Role(Math.random() > 0.5 ? monster_01 : monster_02)
+            .addPosition({ x: Math.random()*1000, y: Math.random() * 700, z: 0 })
+            .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0})
+            .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
+            .addExtraRenderInfo(showHp)
+        )
+    }, 2000);
 
 })
 

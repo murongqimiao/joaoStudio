@@ -1,6 +1,7 @@
 export const attackEvent = function (HitObj, BeHitObj, type) {
     if (type === 'normal') {
         try {
+            if (BeHitObj.curEvent.includes('death')) { return }
             const damage = HitObj.state.atk - BeHitObj.state.def > 0 ? HitObj.state.atk - BeHitObj.state.def : 0 // computed damage
             BeHitObj.state.hp -= damage
             if (BeHitObj.state.hp < 0 || BeHitObj.state.hp === 0) { // trigger dead event

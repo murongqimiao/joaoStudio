@@ -555,8 +555,8 @@ export const skill_01 = {
     onCrash: function() {
         const [skillItem, crashItem, game] = arguments
         if (
-            skillItem.curRender.curFrameImgIndex === 3
-            // skillItem.curRender.curFrame === 0 // when computed crash with  第5帧动画开始计算有效伤害
+            skillItem.curRender.curFrameImgIndex === 3 &&
+            skillItem.curRender.curFrame === 5 // when computed crash with  第5帧动画开始计算有效伤害
         ) {
             if (crashItem.state.isMonster) {
                 let direction = getFaceToDirection({
@@ -567,8 +567,8 @@ export const skill_01 = {
                 })
 
                 // exec attack action
-                if (crashItem.curEvent.includes('death')) { return }
                 attackEvent(skillItem, crashItem, 'normal')
+                if (crashItem.curEvent.includes('death')) { return }
                 crashItem.resetFrameInfo(`${direction}_hit`)
                 crashItem.addFrameEndEvent(crashItem.recoverFrameInfo.bind(crashItem))
             }
@@ -625,25 +625,28 @@ export const skill_02 = {
   },
   onCrash: function() {
       const [skillItem, crashItem, game] = arguments
-      // if (
-      //     skillItem.curRender.curFrameImgIndex === 3
-      //     // skillItem.curRender.curFrame === 0 // when computed crash with  第5帧动画开始计算有效伤害
-      // ) {
-      //     if (crashItem.state.isMonster) {
-      //         let direction = getFaceToDirection({
-      //             x1: crashItem.position.x,
-      //             y1: crashItem.position.y,
-      //             x2: skillItem.position.x,
-      //             y2: skillItem.position.y
-      //         })
+      if (crashItem.state.isMonster) {
+          // 每n帧只能伤害一次
+          let n = 10
+          if (crashItem.skillDamageCodeDown && crashItem.skillDamageCodeDown < n) {
+            crashItem.skillDamageCodeDown++
+            return
+          } else {
+            crashItem.skillDamageCodeDown = 1
+          }
+          let direction = getFaceToDirection({
+              x1: crashItem.position.x,
+              y1: crashItem.position.y,
+              x2: skillItem.position.x,
+              y2: skillItem.position.y
+          })
 
-      //         // exec attack action
-      //         if (crashItem.curEvent.includes('death')) { return }
-      //         attackEvent(skillItem, crashItem, 'normal')
-      //         crashItem.resetFrameInfo(`${direction}_hit`)
-      //         crashItem.addFrameEndEvent(crashItem.recoverFrameInfo.bind(crashItem))
-      //     }
-      // }
+          // exec attack action
+          attackEvent(skillItem, crashItem, 'normal')
+          if (crashItem.curEvent.includes('death')) { return }
+          crashItem.resetFrameInfo(`${direction}_hit`)
+          crashItem.addFrameEndEvent(crashItem.recoverFrameInfo.bind(crashItem))
+      }
   },
   crashObstacle: function() {
     const [skillItem, crashItem, game] = arguments
