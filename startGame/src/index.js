@@ -107,7 +107,6 @@ class Game {
                                   v.position = JSON.parse(JSON.stringify(v.oldPosition))
                                   delete v.oldPosition
                                 }
-                                console.log("==========crash obstacle===========")
                                 if (v.crashObstacle) {
                                   v.crashObstacle(v, item, this)
                                 }
@@ -636,7 +635,7 @@ class Skill {
                         break;
                     default: () => { }
                 }
-                drawDot({ ctx, color: 'yellow' }, [this.position.x, this.position.y, 1] )
+                drawDot({ ctx, color: 'yellow' }, [getMainViewportPostion(this.position).x, getMainViewportPostion(this.position).y, 1] )
             }
         }
         
