@@ -414,7 +414,9 @@ class Role {
             if (curFrame === frameList[curFrameImgIndex].frameStayTime) { // 动画行进到下一张
                 if (curFrameImgIndex === frameList.length - 1) { // 重复动画归0
                     // 钩子 执行完动画后, 判断帧动画结束时间是否存在
-                    this.nextFrameEndEvent && this.nextFrameEndEvent.length && this.nextFrameEndEvent.shift()() // 帧动画结束事件
+                    while (this.nextFrameEndEvent && this.nextFrameEndEvent.length) {
+                      this.nextFrameEndEvent.shift()() // 帧动画结束事件 全部执行
+                    }
                     if (!this.curRender.cantChangeEvent) {
                         this.curRender.curFrameImgIndex = 0
                         this.curRender.curFrame = 0
@@ -513,6 +515,10 @@ class Role {
         let direction = this.curEvent.slice(0, 1)
         this.initFrameInfo(`${direction}_death`)
         this.curRender.cantChangeEvent = true
+        this.addFrameEndEvent(function() {
+          this.delete = true
+          window.__game.removeMonster(this)
+        }.bind(this))
     }
     addExtraRenderInfo (extraInfo) {
         let _extraInfo = extraInfo.bind(this)
@@ -584,7 +590,9 @@ class Skill {
             if (curFrame === frameList[curFrameImgIndex].frameStayTime) { // 动画行进到下一张
                 if (curFrameImgIndex === frameList.length - 1) { // 重复动画归0
                     // 钩子 执行完动画后, 判断帧动画结束时间是否存在
-                    this.nextFrameEndEvent && this.nextFrameEndEvent.length && this.nextFrameEndEvent.shift()() // 帧动画结束事件
+                    while (this.nextFrameEndEvent && this.nextFrameEndEvent.length) {
+                      this.nextFrameEndEvent.shift()() // 帧动画结束事件 全部执行
+                    }
                     this.curRender.curFrameImgIndex = 0
                     this.curRender.curFrame = 0
                 } else {
