@@ -19,7 +19,7 @@ class Game {
     keyCollectBuffer = []
     allRenderList = []
     currentRoleId = 0
-    debug = 1
+    debug = 0
     currentFrameIndexPerSeconde = 0
     gameFPS = 60
     gameStatus = {
@@ -186,7 +186,7 @@ class Game {
         }
         if (positionAvailable || monster.state.isNPC) {
             this.monsterList.push(monster)
-            console.log("addNewMonster,", this.monsterList)
+            console.log("addNewMonster,", this.currentRoleId, this.monsterList)
             monster.onMonsterAdd && this.onMonsterAdd(monster)
             this.updateAllRenderList()
         } else {
@@ -520,8 +520,10 @@ class Role {
         this.initFrameInfo(`${direction}_death`)
         this.curRender.cantChangeEvent = true
         this.addFrameEndEvent(function() {
-          this.delete = true
-          window.__game.removeMonster(this)
+          if (!this.state.isHero) {
+            this.delete = true // hero 尸体保留
+            window.__game.removeMonster(this)
+          }
         }.bind(this))
     }
     addExtraRenderInfo (extraInfo) {
@@ -704,30 +706,41 @@ loadInitResources(() => {
 
     gameNew.resetMainViewportPosition()
     userNew
-    .addPosition({ x: 100 + 200, y: 200 + 200, z: 0 })
+    .addPosition({ x: 550, y: 400, z: 0 })
     .addAction('action', walking, { needTrigger: true, codeDownTime: 0 })
     .addAction('attackAction', attackAction, { needTrigger: true, codeDownTime: 0 })
     .addExtraRenderInfo(createName)
-    monster_01_new.addPosition({ x: 200 + Math.random() * 500, y: 0 + Math.random() * 500, z: 0 })
-    .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0 })
-    .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
-    // gameNew.addNewHero(userNew)
-    // gameNew.addNewHero(userNew).addNewMonster(monster_01_new).addNewMonster(gateWay01New)
+
+    // 追加传送门
     gameNew.addNewHero(userNew).addNewMonster(gateWay01New)
-
-
 
     // 添加地图元素 地图元素应该跟地图绑定在一起作为一个场景的整体属性
         
-    // setInterval(() => {
-    //     gameNew.addNewMonster(
-    //         new Role(Math.random() > 0.5 ? monster_01 : monster_02)
-    //         .addPosition({ x: Math.random()*1000, y: Math.random() * 700, z: 0 })
-    //         .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0})
-    //         .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
-    //         .addExtraRenderInfo(showHp)
-    //     )
-    // }, 2000);
+    let monster_map_01 = [{
+      position: {
+        x: 650,
+        y: 226,
+      }
+    },{
+      position: {
+        x: 290,
+        y: 425,
+      },
+    },{
+      position: {
+        x: 840,
+        y: 315,
+      }
+    }]
+    monster_map_01.forEach(item => {
+      gameNew.addNewMonster(
+        new Role(Math.random() > 0.5 ? monster_01 : monster_02)
+        .addPosition({ x: item.position.x, y: item.position.y, z: 0 })
+        .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0})
+        .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
+        .addExtraRenderInfo(showHp)
+      )
+    })
 
 })
 
