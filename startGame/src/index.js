@@ -1,5 +1,5 @@
 // import { footMan, Monster01, goldCoinInMap, walking, getImageFromX_Y, CONSTANT_COMMON } from "./data"
-import { monster_01, monster_02, materials, user, walking, monsterEventHandler, skill_01, skill_02, MAP_REMORA, createName, showHp } from "./cq_data"
+import { monster_01, monster_02, materials, user, walking, monsterEventHandler, skill_01, skill_02, MAP_REMORA, createName, showHp, gateWay01 } from "./cq_data"
 import { collisionDetection, getBulkBorder, getXYWHSByString, getCenterOriginByString, getOffsetXYByString } from "./utils/collisionDetection"
 import { loadInitResources, getPicByPicName, computedCurRenderBother } from "./utils/checkResourceLoad"
 import { drawDot, drawPolygon, scalePoints, regressOrigin, flatArr } from "./utils/canvasTool"
@@ -184,14 +184,14 @@ class Game {
                 () => { positionAvailable = false },
             )
         }
-        if (positionAvailable) {
+        if (positionAvailable || monster.state.isNPC) {
             this.monsterList.push(monster)
             console.log("addNewMonster,", this.monsterList)
             monster.onMonsterAdd && this.onMonsterAdd(monster)
             this.updateAllRenderList()
         } else {
-            // console.log('=============err==========')
-            // console.error('add new monster fail, new monster position not available')
+            console.log('=============err==========')
+            console.error('add new monster fail, new monster position not available')
         }
         return this;
     }
@@ -457,7 +457,11 @@ class Role {
 
             let renderXInCanvas = Math.round(x - centerOriginxy.x)
             let renderYInCanvas = Math.round(y - centerOriginxy.y)
-            ctx.drawImage(Img, offset.x, offset.y,imgSize.x, imgSize.y, renderXInCanvas, renderYInCanvas, imgSize.x, imgSize.y)
+            try {
+              ctx.drawImage(Img, offset.x, offset.y,imgSize.x, imgSize.y, renderXInCanvas, renderYInCanvas, imgSize.x, imgSize.y)
+            } catch (err) {
+              console.log("=========== draw image error ==============", curRenderBother)
+            }
 
             if (debug) {
                 // 体积描边
@@ -674,6 +678,7 @@ class Skill {
 
 const userNew = new Role(user)
 const monster_01_new = new Role(monster_02)
+const gateWay01New = new Role(gateWay01)
 const gameNew = new Game()
 window.skill_list = { skill_01, skill_02 } 
 window.__game = gameNew
@@ -694,9 +699,12 @@ loadInitResources(() => {
         gameNew.getFPS()
     }, 1000);
 
+    gateWay01New
+    .addPosition({ x: 708, y: 490, z: 0 })
+
     gameNew.resetMainViewportPosition()
     userNew
-    .addPosition({ x: 200 + 200, y: 200 + 200, z: 0 })
+    .addPosition({ x: 100 + 200, y: 200 + 200, z: 0 })
     .addAction('action', walking, { needTrigger: true, codeDownTime: 0 })
     .addAction('attackAction', attackAction, { needTrigger: true, codeDownTime: 0 })
     .addExtraRenderInfo(createName)
@@ -704,17 +712,22 @@ loadInitResources(() => {
     .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0 })
     .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
     // gameNew.addNewHero(userNew)
-    gameNew.addNewHero(userNew).addNewMonster(monster_01_new)
+    // gameNew.addNewHero(userNew).addNewMonster(monster_01_new).addNewMonster(gateWay01New)
+    gameNew.addNewHero(userNew).addNewMonster(gateWay01New)
+
+
+
+    // 添加地图元素 地图元素应该跟地图绑定在一起作为一个场景的整体属性
         
-    setInterval(() => {
-        gameNew.addNewMonster(
-            new Role(Math.random() > 0.5 ? monster_01 : monster_02)
-            .addPosition({ x: Math.random()*1000, y: Math.random() * 700, z: 0 })
-            .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0})
-            .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
-            .addExtraRenderInfo(showHp)
-        )
-    }, 2000);
+    // setInterval(() => {
+    //     gameNew.addNewMonster(
+    //         new Role(Math.random() > 0.5 ? monster_01 : monster_02)
+    //         .addPosition({ x: Math.random()*1000, y: Math.random() * 700, z: 0 })
+    //         .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0})
+    //         .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
+    //         .addExtraRenderInfo(showHp)
+    //     )
+    // }, 2000);
 
 })
 
