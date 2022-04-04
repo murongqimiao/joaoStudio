@@ -1,5 +1,5 @@
 // import { footMan, Monster01, goldCoinInMap, walking, getImageFromX_Y, CONSTANT_COMMON } from "./data"
-import { monster_01, monster_02, materials, user, walking, monsterEventHandler, skill_01, skill_02, MAP_REMORA, createName, showHp } from "./cq_data"
+import { monster_01, monster_02, materials, user, walking, monsterEventHandler, skill_01, skill_02, MAP_REMORA, createName, showHp, gateWay01 } from "./cq_data"
 import { collisionDetection, getBulkBorder, getXYWHSByString, getCenterOriginByString, getOffsetXYByString } from "./utils/collisionDetection"
 import { loadInitResources, getPicByPicName, computedCurRenderBother } from "./utils/checkResourceLoad"
 import { drawDot, drawPolygon, scalePoints, regressOrigin, flatArr } from "./utils/canvasTool"
@@ -58,7 +58,7 @@ class Game {
         drawMap({ ctx, mainViewportPosition: this.mainViewportPosition })
         
         // update skillItem
-        this.skillList.forEach(v => v.update && v.update(v))
+        this.skillList.forEach(v => { v.update && v.update(v) })
         // 执行行为
         let needUpdate = false
         this.allRenderList.forEach((v, index) => {
@@ -82,15 +82,15 @@ class Game {
                     ) {
                         // has crash
                         v.onCrash && v.onCrash(v, item, this)
-                        item.onCrash && item.onCrash(item, v, this)
                         // use postion before creash occur
                         if (v.oldPosition &&
                             v.curRender.curFrameInfo.volumeInfo.slice(-1) === '1' &&
                             item.curRender.curFrameInfo.volumeInfo.slice(-1) === '1') {
                             // solid crash with solid thing need back old position
                             v.position = JSON.parse(JSON.stringify(v.oldPosition))
+                            // console.log("=============v==================", v)
+                            delete v.oldPosition
                         }
-                        delete v.oldPosition
                     }
 
                     // 检测地图障碍物 mapRule [], collisionCallBack, passCallBack
@@ -100,10 +100,19 @@ class Game {
                         _checkMapRemora(mapRule,
                             v,
                             () => {
-                                v.position = JSON.parse(JSON.stringify(v.oldPosition))
-                                delete v.oldPosition
+                                // 地图障碍物碰撞
+                                if (v.state.isSolid) {
+                                  // console.log("============地图碰撞检测===========", v)
+                                  v.position = JSON.parse(JSON.stringify(v.oldPosition))
+                                  delete v.oldPosition
+                                }
+                                if (v.crashObstacle) {
+                                  v.crashObstacle(v, item, this)
+                                }
                             },
-                            () => {},
+                            () => {
+                                // 地图障碍物没有发生碰撞
+                            },
                             ctx
                         )
                     }
@@ -120,7 +129,6 @@ class Game {
         if (needUpdate) {
             this.updateAllRenderList()
         }
-
 
         // 计算render的层级顺序
         this.filterRenderListByPositionY()
@@ -176,14 +184,14 @@ class Game {
                 () => { positionAvailable = false },
             )
         }
-        if (positionAvailable) {
+        if (positionAvailable || monster.state.isNPC) {
             this.monsterList.push(monster)
             console.log("addNewMonster,", this.monsterList)
             monster.onMonsterAdd && this.onMonsterAdd(monster)
             this.updateAllRenderList()
         } else {
-            // console.log('=============err==========')
-            // console.error('add new monster fail, new monster position not available')
+            console.log('=============err==========')
+            console.error('add new monster fail, new monster position not available')
         }
         return this;
     }
@@ -251,7 +259,12 @@ class Game {
 
     // 更新
     updateAllRenderList() {
-
+        // 更新时候移除已经删除的元素
+        this.skillList.forEach(v => {
+          if (v.delete) {
+            this.removeSKill(v)
+          }
+        })
         this.allRenderList = [].concat(this.monsterList).concat(this.heroList).concat(this.environmentList).concat(this.skillList).filter(v => { return !v.delete })
     }
 
@@ -401,7 +414,9 @@ class Role {
             if (curFrame === frameList[curFrameImgIndex].frameStayTime) { // 动画行进到下一张
                 if (curFrameImgIndex === frameList.length - 1) { // 重复动画归0
                     // 钩子 执行完动画后, 判断帧动画结束时间是否存在
-                    this.nextFrameEndEvent && this.nextFrameEndEvent.length && this.nextFrameEndEvent.shift()() // 帧动画结束事件
+                    while (this.nextFrameEndEvent && this.nextFrameEndEvent.length) {
+                      this.nextFrameEndEvent.shift()() // 帧动画结束事件 全部执行
+                    }
                     if (!this.curRender.cantChangeEvent) {
                         this.curRender.curFrameImgIndex = 0
                         this.curRender.curFrame = 0
@@ -442,7 +457,11 @@ class Role {
 
             let renderXInCanvas = Math.round(x - centerOriginxy.x)
             let renderYInCanvas = Math.round(y - centerOriginxy.y)
-            ctx.drawImage(Img, offset.x, offset.y,imgSize.x, imgSize.y, renderXInCanvas, renderYInCanvas, imgSize.x, imgSize.y)
+            try {
+              ctx.drawImage(Img, offset.x, offset.y,imgSize.x, imgSize.y, renderXInCanvas, renderYInCanvas, imgSize.x, imgSize.y)
+            } catch (err) {
+              console.log("=========== draw image error ==============", curRenderBother)
+            }
 
             if (debug) {
                 // 体积描边
@@ -500,6 +519,10 @@ class Role {
         let direction = this.curEvent.slice(0, 1)
         this.initFrameInfo(`${direction}_death`)
         this.curRender.cantChangeEvent = true
+        this.addFrameEndEvent(function() {
+          this.delete = true
+          window.__game.removeMonster(this)
+        }.bind(this))
     }
     addExtraRenderInfo (extraInfo) {
         let _extraInfo = extraInfo.bind(this)
@@ -519,6 +542,7 @@ class Skill {
         this.onCrash = props.onCrash || null
         this.timeReduceInfo = props.timeReduceInfo || {}
         this.update = props.update || null
+        this.crashObstacle = props.crashObstacle || null
     }
     addPosition(params) {
         const { x, y, z = 0, yRegression = 0 } = params;
@@ -570,7 +594,9 @@ class Skill {
             if (curFrame === frameList[curFrameImgIndex].frameStayTime) { // 动画行进到下一张
                 if (curFrameImgIndex === frameList.length - 1) { // 重复动画归0
                     // 钩子 执行完动画后, 判断帧动画结束时间是否存在
-                    this.nextFrameEndEvent && this.nextFrameEndEvent.length && this.nextFrameEndEvent.shift()() // 帧动画结束事件
+                    while (this.nextFrameEndEvent && this.nextFrameEndEvent.length) {
+                      this.nextFrameEndEvent.shift()() // 帧动画结束事件 全部执行
+                    }
                     this.curRender.curFrameImgIndex = 0
                     this.curRender.curFrame = 0
                 } else {
@@ -608,20 +634,20 @@ class Skill {
               console.log(err, Img, curRenderBother.name)
             }
 
-            // if (debug) {
-            //     // 体积描边
-            //     const borderData = getBulkBorder(this, xywhs, centerOriginxy, imgSize);
-            //     switch (this.curRender.curFrameInfo.shape) {
-            //         case 'rectangle':
-            //             drawPolygon({ ctx, color: 'blue' }, borderData);
-            //             break;
-            //         case 'circle':
-            //             drawDot({ ctx }, borderData)
-            //             break;
-            //         default: () => { }
-            //     }
-            //     drawDot({ ctx, color: 'yellow' }, [this.position.x, this.position.y, 1] )
-            // }
+            if (debug) {
+                // 体积描边
+                const borderData = getBulkBorder(this, xywhs, centerOriginxy, imgSize);
+                switch (this.curRender.curFrameInfo.shape) {
+                    case 'rectangle':
+                        drawPolygon({ ctx, color: 'blue' }, borderData);
+                        break;
+                    case 'circle':
+                        drawDot({ ctx }, borderData)
+                        break;
+                    default: () => { }
+                }
+                drawDot({ ctx, color: 'yellow' }, [getMainViewportPostion(this.position).x, getMainViewportPostion(this.position).y, 1] )
+            }
         }
         
         return this
@@ -652,6 +678,7 @@ class Skill {
 
 const userNew = new Role(user)
 const monster_01_new = new Role(monster_02)
+const gateWay01New = new Role(gateWay01)
 const gameNew = new Game()
 window.skill_list = { skill_01, skill_02 } 
 window.__game = gameNew
@@ -672,17 +699,25 @@ loadInitResources(() => {
         gameNew.getFPS()
     }, 1000);
 
+    gateWay01New
+    .addPosition({ x: 708, y: 490, z: 0 })
+
     gameNew.resetMainViewportPosition()
     userNew
-    .addPosition({ x: 200 + 200, y: 200 + 200, z: 0 })
+    .addPosition({ x: 100 + 200, y: 200 + 200, z: 0 })
     .addAction('action', walking, { needTrigger: true, codeDownTime: 0 })
     .addAction('attackAction', attackAction, { needTrigger: true, codeDownTime: 0 })
     .addExtraRenderInfo(createName)
-    // monster_01_new.addPosition({ x: 200 + Math.random() * 500, y: 0 + Math.random() * 500, z: 0 })
-    // .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0 })
-    // .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
-    gameNew.addNewHero(userNew)
-    // gameNew.addNewHero(userNew).addNewMonster(monster_01_new)
+    monster_01_new.addPosition({ x: 200 + Math.random() * 500, y: 0 + Math.random() * 500, z: 0 })
+    .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0 })
+    .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
+    // gameNew.addNewHero(userNew)
+    // gameNew.addNewHero(userNew).addNewMonster(monster_01_new).addNewMonster(gateWay01New)
+    gameNew.addNewHero(userNew).addNewMonster(gateWay01New)
+
+
+
+    // 添加地图元素 地图元素应该跟地图绑定在一起作为一个场景的整体属性
         
     // setInterval(() => {
     //     gameNew.addNewMonster(
