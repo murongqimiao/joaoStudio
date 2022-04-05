@@ -19,7 +19,7 @@ class Game {
     keyCollectBuffer = []
     allRenderList = []
     currentRoleId = 0
-    debug = 1
+    debug = 0
     currentFrameIndexPerSeconde = 0
     gameFPS = 60
     gameStatus = {
