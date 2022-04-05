@@ -178,7 +178,7 @@ export const computedCurRenderBother = (name) => {
         offset: "0_0"
     }
     result.imgSizeInfo = params.frame.split("},{")[1].replaceAll("}}", "").replaceAll(",", "_")
-    result.centerOrigin = result.imgSizeInfo.split("_").map(v => Number(v / 2)).join("_")
+    result.centerOrigin = result.imgSizeInfo.split("_").map((v, index) =>  index === 0 ? Number(v / 2) : Number(v)).join("_")
     result.offset = params.frame.split("},{")[0].replaceAll("{{", "").replaceAll(",", "_")
     result.volumeInfo = "0_0_" + result.imgSizeInfo + "_0"
     return result

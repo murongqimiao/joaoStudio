@@ -700,8 +700,10 @@ export const gateWay01 = {
   },
   onCrash: function() {
       const [skillItem, crashItem, game] = arguments
-      console.log("==========走入传送阵==========")
-      console.log(skillItem, crashItem, game)
+      if (crashItem.state.isHero) {
+        console.log("==========角色进入传送阵==========")
+        console.log(skillItem, crashItem, game)
+      }
   }
   
 }

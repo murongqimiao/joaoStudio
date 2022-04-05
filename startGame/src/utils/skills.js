@@ -17,7 +17,7 @@ export const attackAction = function (game, triggerInfo) {
         .initFrameInfo(`${heroDirection}_stand`)
         .addAction('deadTimeReduce', deadTimeReduce, Object.assign({ needTrigger: true, codeDownTime: 0, deadTime: 2, attackUser: this }, attackSkill.timeReduceInfo))
         game.addNewSkill(attackSkill)
-        console.log("==========增加技能===========", x, y)
+        // console.log("==========增加技能===========", x, y)
         
         // let attackSkill.addPosition({})
         // if (computedDistance(this.position.x, this.position.y, attackAim.position.x, attackAim.position.y) < 70) {
