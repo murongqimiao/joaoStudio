@@ -19,7 +19,7 @@ class Game {
     keyCollectBuffer = []
     allRenderList = []
     currentRoleId = 0
-    debug = 0
+    debug = 1
     currentFrameIndexPerSeconde = 0
     gameFPS = 60
     gameStatus = {
@@ -186,7 +186,6 @@ class Game {
         }
         if (positionAvailable || monster.state.isNPC) {
             this.monsterList.push(monster)
-            console.log("addNewMonster,", this.currentRoleId, this.monsterList)
             monster.onMonsterAdd && this.onMonsterAdd(monster)
             this.updateAllRenderList()
         } else {
@@ -209,7 +208,6 @@ class Game {
             )
         }
         if (positionAvailable) {
-            console.log("===========add success=========")
             this.heroList.push(hero)
             hero.onHeroAdd && this.onHeroAdd(hero)
             this.updateAllRenderList()
@@ -229,8 +227,7 @@ class Game {
     }
 
     removeMonster(monster) {
-        let index = this.monsterList.findIndex(v => v.currentId === monster.currentId)
-        this.monsterList.splice(index, 1)
+        this.monsterList = this.monsterList.filter(v => v.currentId !== monster.currentId)
         console.log("remove Monster,", this.monsterList)
         monster.onDead && monster.onDead(this, monster)
         this.updateAllRenderList()
@@ -247,9 +244,8 @@ class Game {
     }
 
     removeSKill(skillItem) {
-        let index = this.skillList.findIndex(v => v.currentId === skillItem.currentId)
-        this.skillList.splice(index, 1)
-        console.log("remove skill item", this.skillList)
+        this.skillList = this.skillList.filter(v => v.currentId === skillItem.currentId)
+        // console.log("remove skill item", this.skillList)
         skillItem.onSkillRemove && skillItem.onSkillRemove(this).bind(skillItem)
         this.updateAllRenderList()
         return this;
@@ -260,11 +256,6 @@ class Game {
     // 更新
     updateAllRenderList() {
         // 更新时候移除已经删除的元素
-        this.skillList.forEach(v => {
-          if (v.delete) {
-            this.removeSKill(v)
-          }
-        })
         this.allRenderList = [].concat(this.monsterList).concat(this.heroList).concat(this.environmentList).concat(this.skillList).filter(v => { return !v.delete })
     }
 
@@ -300,10 +291,15 @@ class Game {
     filterRenderListByPositionY() {
         // 根据y坐标调整角色渲染层级
         this.allRenderList.sort((a, b) => {
-            if (a.curEvent && a.curRender.curFrameInfo && b.curEvent && b.curRender.curFrameInfo) {
-                let aImageInfo = getCenterOriginByString(a.curRender.curFrameInfo.centerOrigin)
-                let bImageInfo = getCenterOriginByString(a.curRender.curFrameInfo.centerOrigin)
-                return ((a.position.y - aImageInfo.y) - (b.position.y - bImageInfo.y))
+            // if (a.curEvent && a.curRender.curFrameInfo && b.curEvent && b.curRender.curFrameInfo) {
+            //     let aImageInfo = getCenterOriginByString(a.curRender.curFrameInfo.centerOrigin)
+            //     let bImageInfo = getCenterOriginByString(a.curRender.curFrameInfo.centerOrigin)
+            //     return ((a.position.y - aImageInfo.y) - (b.position.y - bImageInfo.y))
+            // } else {
+            //     return false
+            // }
+            if (a.position && b.position) {
+                return (a.position.y - b.position.y)
             } else {
                 return false
             }
@@ -521,6 +517,7 @@ class Role {
         this.curRender.cantChangeEvent = true
         this.addFrameEndEvent(function() {
           if (!this.state.isHero) {
+            console.log("==============death============", this)
             this.delete = true // hero 尸体保留
             window.__game.removeMonster(this)
           }
@@ -689,7 +686,36 @@ window.__Skill = Skill
 
 addGameListener(gameNew)
 
-
+// 测试用恢复monster list
+const resetMonster = () => {
+  window.__game.monsterList = []
+  let monster_map_01 = [{
+    position: {
+      x: 650,
+      y: 226,
+    }
+  },{
+    position: {
+      x: 290,
+      y: 425,
+    },
+  },{
+    position: {
+      x: 840,
+      y: 315,
+    }
+  }]
+  monster_map_01.forEach(item => {
+    gameNew.addNewMonster(
+      new Role(Math.random() > 0.5 ? monster_01 : monster_02)
+      .addPosition({ x: item.position.x, y: item.position.y, z: 0 })
+      .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0})
+      .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
+      .addExtraRenderInfo(showHp)
+    )
+  })
+  gameNew.addNewMonster(gateWay01New)
+}
 
 /**
  * 判断图片资源加载状态
@@ -712,35 +738,14 @@ loadInitResources(() => {
     .addExtraRenderInfo(createName)
 
     // 追加传送门
-    gameNew.addNewHero(userNew).addNewMonster(gateWay01New)
+    gameNew.addNewHero(userNew)
 
     // 添加地图元素 地图元素应该跟地图绑定在一起作为一个场景的整体属性
-        
-    let monster_map_01 = [{
-      position: {
-        x: 650,
-        y: 226,
-      }
-    },{
-      position: {
-        x: 290,
-        y: 425,
-      },
-    },{
-      position: {
-        x: 840,
-        y: 315,
-      }
-    }]
-    monster_map_01.forEach(item => {
-      gameNew.addNewMonster(
-        new Role(Math.random() > 0.5 ? monster_01 : monster_02)
-        .addPosition({ x: item.position.x, y: item.position.y, z: 0 })
-        .addAction('monsterEventHandler', monsterEventHandler, { needTrigger: true, codeDownTime: 0})
-        .addAction('mind', monsterMainMind, { needTrigger: true, codeDownTime: 60 })
-        .addExtraRenderInfo(showHp)
-      )
-    })
+    resetMonster()
+    document.querySelector('#reset-monster').onclick = () => {
+      resetMonster()
+    }
+    
 
 })
 
