@@ -25,19 +25,32 @@ class Game {
     gameStatus = {
         loading: false
     }
+    // mainViewportPosition = {
+    //     height: 650, // 视口高 canvas
+    //     width: 1024,
+    //     cavnasId: 'canvas',
+    //     leftDistances: 200, // distances from map left
+    //     topDistances: 100,
+    //     marginLeft: 100,
+    //     marginTop: 150,
+    //     marginRight: 100,
+    //     marginBottom: 150,
+    //     map: '_map_10023',
+    //     scale: 0.5
+    // }
     mainViewportPosition = {
-        height: 650, // 视口高 canvas
-        width: 1024,
-        cavnasId: 'canvas',
-        leftDistances: 200, // distances from map left
-        topDistances: 100,
-        marginLeft: 100,
-        marginTop: 150,
-        marginRight: 100,
-        marginBottom: 150,
-        map: '_map_10023',
-        scale: 0.5
-    }
+      height: 650, // 视口高 canvas
+      width: 1024,
+      cavnasId: 'canvas',
+      leftDistances: 500, // distances from map left
+      topDistances: 500,
+      marginLeft: 100,
+      marginTop: 150,
+      marginRight: 100,
+      marginBottom: 150,
+      map: '_map_10321',
+      scale: 1 
+  }
     actionViewPortPosition = {
         paddingLeft: 0,
         paddingTop: 0,
@@ -687,25 +700,31 @@ window.__Skill = Skill
 addGameListener(gameNew)
 
 // 测试用恢复monster list
-const resetMonster = () => {
+const resetMonster = (monsterList) => {
   window.__game.monsterList = []
-  let monster_map_01 = [{
-    position: {
-      x: 650,
-      y: 226,
-    }
-  },{
-    position: {
-      x: 290,
-      y: 425,
-    },
-  },{
-    position: {
-      x: 840,
-      y: 315,
-    }
-  }]
-  monster_map_01.forEach(item => {
+  let _monsterList = []
+  if (monsterList) {
+    _monsterList = monsterList
+  } else {
+    _monsterList = [{
+      position: {
+        x: 650,
+        y: 226,
+      }
+    },{
+      position: {
+        x: 290,
+        y: 425,
+      },
+    },{
+      position: {
+        x: 840,
+        y: 315,
+      }
+    }]
+  }
+  
+  _monsterList.forEach(item => {
     gameNew.addNewMonster(
       new Role(Math.random() > 0.5 ? monster_01 : monster_02)
       .addPosition({ x: item.position.x, y: item.position.y, z: 0 })
@@ -732,7 +751,8 @@ loadInitResources(() => {
 
     gameNew.resetMainViewportPosition()
     userNew
-    .addPosition({ x: 550, y: 400, z: 0 })
+    // .addPosition({ x: 550, y: 400, z: 0 })
+    .addPosition({ x: 2000, y: 1000, z: 0 })
     .addAction('action', walking, { needTrigger: true, codeDownTime: 0 })
     .addAction('attackAction', attackAction, { needTrigger: true, codeDownTime: 0 })
     .addExtraRenderInfo(createName)

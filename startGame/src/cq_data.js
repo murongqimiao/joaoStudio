@@ -118,7 +118,7 @@ const CONSTANT_IMG = {
 }
 
 export const MAP_REMORA = {
-   '_map_10023': [{
+    '_map_10023': [{
        polygonPoints: [
            [252, 889],
            [225, 996],
@@ -132,7 +132,24 @@ export const MAP_REMORA = {
            [538, 739]
         ],
        type: 'in'
-   }] 
+   }],
+    '_map_10321': [{
+      polygonPoints: [
+        [1703, 1195],
+        [1708, 1330],
+        [1860, 1300],
+        [1732, 1373],
+        [1833, 1426],
+        [1608, 1573],
+        [1727, 1478],
+        [1656, 1450], 
+        [1669, 1359], 
+        [1585, 1376], 
+        [1679, 1341], 
+        [1681, 1199], 
+     ],
+      type: 'out'
+    }]
 }
 
 const recoverStateFunc = function () {
