@@ -24,32 +24,32 @@ export const CONSTANT_COMMON = {
 }
 
 /**
- * 参数参考  name 图片名称 | _offsetLeft 读取取值距离左侧 | _offsetTop 读图距离顶部  | toWidth 绘制时宽 | toHeight 绘制时高 | volumeWidth 体积宽  | volueHeight 体积高 | volume offset left 体积距离图片左侧 | volue offset top 体积距离图片顶部 | center x 实际站位点距离图片左侧  | center y 实际站位点距离顶部  | volumeshape 体积形状  | transform 图像变换
+ * 参数参考  name 图片名称 | _offsetLeft 读取取值距离左侧 | _offsetTop 读图距离顶部  | toWidth 绘制时宽 | toHeight 绘制时高 | volumeWidth 体积宽  | volueHeight 体积高 | volume offset left 体积距离图片左侧 | volue offset top 体积距离图片顶部 | center x 实际站位点距离图片左侧  | center y 实际站位点距离顶部  | volumeshape 体积形状  | transform 图像变换 | frames 每张图持续几帧
  */
 
 export const imgInfo = {
-    // name | _offsetLeft | _offsetTop | toWidth| toHeight | volumeWidth | volumeHeight | volumeOffsetLEft | volumeOffsetTop | centerLeft | centerTop | volumeShape | transoform  共13项
+    // name | _offsetLeft | _offsetTop | toWidth| toHeight | volumeWidth | volumeHeight | volumeOffsetLEft | volumeOffsetTop | centerLeft | centerTop | volumeShape | transoform  共13项 | frames 每张图持续几帧
     '2_stand': [
-        '0_stand_0.png | 0 | 0 | 57 | 81 | 57 | 81 | 0 | 0 | 29 | 81 | rectangle | turnX(50%, 50%)',
-        '0_stand_1.png | 0 | 0 | 57 | 81 | 57 | 81 | 0 | 0 | 29 | 81 | rectangle | turnX(50%, 50%)',
-        '0_stand_2.png | 0 | 0 | 57 | 81 | 57 | 81 | 0 | 0 | 29 | 81 | rectangle | turnX(50%, 50%)',
+        '0_stand_0.png | 0 | 0 | 57 | 81 | 57 | 81 | 0 | 0 | 29 | 81 | rectangle | turnX(50%, 50%) | 5',
+        '0_stand_1.png | 0 | 0 | 57 | 81 | 57 | 81 | 0 | 0 | 29 | 81 | rectangle | turnX(50%, 50%) | 5',
+        '0_stand_2.png | 0 | 0 | 57 | 81 | 57 | 81 | 0 | 0 | 29 | 81 | rectangle | turnX(50%, 50%) | 5',
     ],
     '6_stand': [
-        '0_stand_0.png | 0 | 0 | 57 | 81 | 57 | 81 | 0 | 0 | 29 | 81 | rectangle | null',
-        '0_stand_1.png | 0 | 0 | 57 | 81 | 57 | 81 | 0 | 0 | 29 | 81 | rectangle | null',
-        '0_stand_2.png | 0 | 0 | 57 | 81 | 57 | 81 | 0 | 0 | 29 | 81 | rectangle | null',
+        '0_stand_0.png | 0 | 0 | 57 | 81 | 57 | 81 | 0 | 0 | 29 | 81 | rectangle | null | 5',
+        '0_stand_1.png | 0 | 0 | 57 | 81 | 57 | 81 | 0 | 0 | 29 | 81 | rectangle | null | 5',
+        '0_stand_2.png | 0 | 0 | 57 | 81 | 57 | 81 | 0 | 0 | 29 | 81 | rectangle | null | 5',
     ],
     '2_run': [
-        '6_run_0.png | 0 | 0 | 57 | 80 | 57 | 80 | 0 | 0 | 29 | 80 | rectangle | turnX(50%, 50%)',
-        '6_run_1.png | 0 | 0 | 57 | 81 | 57 | 81 | 0 | 0 | 29 | 80 | rectangle | turnX(50%, 50%)',
-        '6_run_2.png | 0 | 0 | 57 | 80 | 57 | 80 | 0 | 0 | 29 | 80 | rectangle | turnX(50%, 50%)',
-        '6_run_3.png | 0 | 0 | 57 | 81 | 57 | 81 | 0 | 0 | 29 | 80 | rectangle | turnX(50%, 50%)',
+        '6_run_0.png | 0 | 0 | 57 | 80 | 57 | 80 | 0 | 0 | 29 | 80 | rectangle | turnX(50%, 50%) | 5',
+        '6_run_1.png | 0 | 0 | 57 | 81 | 57 | 81 | 0 | 0 | 29 | 80 | rectangle | turnX(50%, 50%) | 5',
+        '6_run_2.png | 0 | 0 | 57 | 80 | 57 | 80 | 0 | 0 | 29 | 80 | rectangle | turnX(50%, 50%) | 5',
+        '6_run_3.png | 0 | 0 | 57 | 81 | 57 | 81 | 0 | 0 | 29 | 80 | rectangle | turnX(50%, 50%) | 5',
     ],
     '6_run': [
-        '6_run_0.png | 0 | 0 | 57 | 80 | 57 | 80 | 0 | 0 | 29 | 80 | rectangle | null',
-        '6_run_1.png | 0 | 0 | 57 | 81 | 57 | 81 | 0 | 0 | 29 | 80 | rectangle | null',
-        '6_run_2.png | 0 | 0 | 57 | 80 | 57 | 80 | 0 | 0 | 29 | 80 | rectangle | null',
-        '6_run_3.png | 0 | 0 | 57 | 81 | 57 | 81 | 0 | 0 | 29 | 80 | rectangle | null',
+        '6_run_0.png | 0 | 0 | 57 | 80 | 57 | 80 | 0 | 0 | 29 | 80 | rectangle | null | 5',
+        '6_run_1.png | 0 | 0 | 57 | 81 | 57 | 81 | 0 | 0 | 29 | 80 | rectangle | null | 5',
+        '6_run_2.png | 0 | 0 | 57 | 80 | 57 | 80 | 0 | 0 | 29 | 80 | rectangle | null | 5',
+        '6_run_3.png | 0 | 0 | 57 | 81 | 57 | 81 | 0 | 0 | 29 | 80 | rectangle | null | 5',
     ]
 
 }
