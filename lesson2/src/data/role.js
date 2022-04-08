@@ -1,13 +1,18 @@
+/**
+ * 角色类信息
+ */
+import { generateFrameList } from "../utils/handleImage"
+import { imgFrameInfo, CONSTANT_COMMON } from "./common"
+
 export const role01 = {
-    role: {
-        id: 1,
+    state: {
+        id: '001',
         name: "主角abc",
         des: "user control human description",
         hp: CONSTANT_COMMON.BASE_HERO_HP,
         atk: CONSTANT_COMMON.BASE_HERO_ATK,
         def: CONSTANT_COMMON.BASE_HERO_DEF,
         spd: CONSTANT_COMMON.BASE_HERO_SPD,
-        isSolid: true,
         isHero: true,
         maxHp:  CONSTANT_COMMON.BASE_HERO_HP,
         volumeInfo: {
@@ -20,7 +25,7 @@ export const role01 = {
             id: 1,
             number: 0
         }],
-        defaultEvent: '4_stand'
+        defaultEvent: '2_stand'
     },
     skill: {
         cd: CONSTANT_COMMON.BASE_ONE_SECOND
@@ -28,37 +33,26 @@ export const role01 = {
     zIndex: 10,
     // 图片渲染的优化方向, 提供一个使用大图的高宽及横纵下标返回图片的能力
   
-    framesList: generateFrameList({
-        name: 'new_dco004',
-        type: 'human',
-        attackTime: 6,
-        attackFrame: 5,
-        deathTime: 3,
-        deathFrame: 5,
-        hitTime: 2,
-        hitFrame: 5,
-        skillTime: 6,
-        skillFrame: 5,
-        standTime: 3,
-        standFrame: 10,
-        runTime: 7,
-        runFrame: 5,
-        imgSizeInfo: CONSTANT_COMMON.COMMON_IMG_SIZE['new_dco004'],
-        volumeInfo: CONSTANT_COMMON.COMMON_VOLUME_SIZE['new_dco004'],
-        centerOrigin: CONSTANT_COMMON.COMMON_ORIGIN_CENTER['new_dco004'],
-        shape: 'rectangle'
-    }),
-    onHeroAdd: function () {
+    framesList: {
+        '2_stand': generateFrameList(imgFrameInfo['2_stand']),
+        '6_stand': generateFrameList(imgFrameInfo['6_stand']),
+        '2_run': generateFrameList(imgFrameInfo['2_run']),
+        '6_run': generateFrameList(imgFrameInfo['2_run']),
+    },
+    // 首次添加时执行
+    onAdded: function () { 
         const [game, self] = arguments
         self.curEvent = self.state.defaultEvent
     },
     onCrash: function () {
         const [self, crashItem] = arguments
-        if (crashItem.state.isSolid) {
-            if (self.curRender.lastFrame) {
-                this.position.x = self.curRender.lastFrame.x1
-                this.position.y = self.curRender.lastFrame.y1
-            }
-        }
+        console.log("======self=========", self)
+        console.log("======crashItem=========", crashItem)
+        // if (crashItem.state.isSolid) {
+        //     if (self.curRender.lastFrame) {
+        //         this.position.x = self.curRender.lastFrame.x1
+        //         this.position.y = self.curRender.lastFrame.y1
+        //     }
+        // }
     }
 }
