@@ -1,6 +1,7 @@
 
 import { loadInitResources } from "./utils/resources"
 import { role01 } from "./data/role"
+import { mainRole } from "./data/roleEvents"
 import { getBulkBorder } from "./utils/collisionDetection"
 import { drawPolygon, drawDot } from "./utils/canvasTool"
 import { addGameListener } from "./utils/addGameListener"
@@ -21,6 +22,7 @@ class Game {
     keyCollectBuffer = [] // 活跃过的按键在缓冲区待一阵
     debug = 1
     gameFPS = 60
+    gameG = 10 * 50 // 多少像素表示一米, g直接粗暴取10
     currentFrameIndexPerSeconde = 0
     gameStatus = {
         loading: false
@@ -42,6 +44,18 @@ class Game {
         const that = this;
 
         this.updateAllRenderList()
+
+        // 触发绑定过的事件
+        this.allRenderList.forEach(v => {
+            v.trigger && v.trigger.forEach(triggerItem => {
+                if (triggerItem.curTime === triggerItem.codeDownTime) {
+                    v[triggerItem.eventName] && v[triggerItem.eventName](this, triggerItem)
+                    triggerItem.curTime = 0
+                } else {
+                    triggerItem.curTime++
+                }
+            })
+        })
 
         // 执行render行为
         this.allRenderList.forEach(v => {
@@ -197,7 +211,12 @@ class Role {
             const frameList = this.framesList[this.curEvent]
             let { curFrameImgIndex, curFrame } = this.curRender
             // 解决高刷屏帧数过高的情况. 对于高刷屏, 比如180帧屏, 可以通过增加停留时间来保证体验的一致性
-            const dynamicFrameStayTime = Math.round(window.__game.gameFPS / 60) * frameList[curFrameImgIndex].frameStayTime
+            let dynamicFrameStayTime = ''
+            try {
+                dynamicFrameStayTime = Math.round(window.__game.gameFPS / 60) * frameList[curFrameImgIndex].frameStayTime
+            } catch (err) {
+                debugger
+            }
             // 命中当前行为 进行渲染
             if (curFrame == dynamicFrameStayTime) { // 动画行进到下一张
                 if (curFrameImgIndex === frameList.length - 1) { // 重复动画归0
@@ -362,6 +381,6 @@ loadInitResources(() => {
 
     // 添加新的角色进入游戏
     let newRole001 = new Role(role01)
-    newRole001.addPosition({ x: 300, y: 400 })
+    newRole001.addPosition({ x: 300, y: 400 }).addAction('action', mainRole, { needTrigger: true, codeDownTime: 0 })
     __game.addNewRole(newRole001)
 })

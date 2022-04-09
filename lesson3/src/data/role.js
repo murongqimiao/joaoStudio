@@ -15,6 +15,8 @@ export const role01 = {
         spd: CONSTANT_COMMON.BASE_HERO_SPD,
         isHero: true,
         maxHp:  CONSTANT_COMMON.BASE_HERO_HP,
+        jumpDuration: 1, // 跳跃浮空时间
+        jumpTime: 2, // 可跳跃次数
         volumeInfo: {
             shape: 'rectangle',
             width: 30,
@@ -37,7 +39,13 @@ export const role01 = {
         '2_stand': generateFrameList(imgFrameInfo['2_stand']),
         '6_stand': generateFrameList(imgFrameInfo['6_stand']),
         '2_run': generateFrameList(imgFrameInfo['2_run']),
-        '6_run': generateFrameList(imgFrameInfo['2_run']),
+        '6_run': generateFrameList(imgFrameInfo['6_run']),
+        '2_jump': generateFrameList(imgFrameInfo['2_jump']),
+        '6_jump': generateFrameList(imgFrameInfo['6_jump']),
+        '2_attack': generateFrameList(imgFrameInfo['2_attack']),
+        '6_attack': generateFrameList(imgFrameInfo['6_attack']),
+        '2_down': generateFrameList(imgFrameInfo['2_down']),
+        '6_down': generateFrameList(imgFrameInfo['6_down']),
     },
     // 首次添加时执行
     onAdded: function () { 

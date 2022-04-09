@@ -24,8 +24,11 @@ export const addGameListener = (gameNew) => {
             case 68:
                 gameNew.keyActiveCollect(event, 'D')
                 break;
-            case 67:
+            case 67: // C
                 gameNew.keyActiveCollect(event, 'C')
+                break;
+            case 88: // X 
+                gameNew.keyActiveCollect(event, 'X')
                 break;
             default: () => { }
         }
