@@ -33,9 +33,9 @@ export const CONSTANT_COMMON = {
 export const imgFrameInfo = {
     // name | _offsetLeft | _offsetTop | toWidth| toHeight | centerLeft | centerTop| transoform  共13项 | frames 每张图持续几帧 | 体积距离左侧 volumeOffsetLeft | 体积距离顶部 volumeOffsetTop | volumeWidth 体积宽  | volumeHeight 体积高
     '2_stand': [
-        '_role_001_0_stand_0 | 0 | 0 | 57 | 81 | 29 | 81 | turnX(50%, 50%) | 9 | 5 | 10 | 47 | 71',
-        '_role_001_0_stand_1 | 0 | 0 | 57 | 81 | 29 | 81 | turnX(50%, 50%) | 9 | 5 | 10 | 47 | 71',
-        '_role_001_0_stand_2 | 0 | 0 | 57 | 81 | 29 | 81 | turnX(50%, 50%) | 9 | 5 | 10 | 47 | 71',
+        '_role_001_0_stand_0 | 0 | 0 | 57 | 81 | 29 | 81 | turnX | 9 | 5 | 10 | 47 | 71',
+        '_role_001_0_stand_1 | 0 | 0 | 57 | 81 | 29 | 81 | turnX | 9 | 5 | 10 | 47 | 71',
+        '_role_001_0_stand_2 | 0 | 0 | 57 | 81 | 29 | 81 | turnX | 9 | 5 | 10 | 47 | 71',
     ],
     '6_stand': [
         '_role_001_0_stand_0 | 0 | 0 | 57 | 81 | 29 | 81 | null | 9 | 0 | 0 | 57 | 81',
@@ -43,10 +43,10 @@ export const imgFrameInfo = {
         '_role_001_0_stand_2 | 0 | 0 | 57 | 81 | 29 | 81 | null | 9 | 0 | 0 | 57 | 81',
     ],
     '2_run': [
-        '_role_001_6_run_0 | 0 | 0 | 57 | 80 | 29 | 80 | turnX(50%, 50%) | 9 | 0 | 0 | 57 | 81',
-        '_role_001_6_run_1 | 0 | 0 | 57 | 81 | 29 | 80 | turnX(50%, 50%) | 9 | 0 | 0 | 57 | 81',
-        '_role_001_6_run_2 | 0 | 0 | 57 | 80 | 29 | 80 | turnX(50%, 50%) | 9 | 0 | 0 | 57 | 81',
-        '_role_001_6_run_3 | 0 | 0 | 57 | 81 | 29 | 80 | turnX(50%, 50%) | 9 | 0 | 0 | 57 | 81',
+        '_role_001_6_run_0 | 0 | 0 | 57 | 80 | 29 | 80 | turnX | 9 | 0 | 0 | 57 | 81',
+        '_role_001_6_run_1 | 0 | 0 | 57 | 81 | 29 | 80 | turnX | 9 | 0 | 0 | 57 | 81',
+        '_role_001_6_run_2 | 0 | 0 | 57 | 80 | 29 | 80 | turnX | 9 | 0 | 0 | 57 | 81',
+        '_role_001_6_run_3 | 0 | 0 | 57 | 81 | 29 | 80 | turnX | 9 | 0 | 0 | 57 | 81',
     ],
     '6_run': [
         '_role_001_6_run_0 | 0 | 0 | 57 | 80 | 29 | 80 | null | 9 | 0 | 0 | 57 | 81',

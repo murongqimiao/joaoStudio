@@ -233,6 +233,12 @@ class Role {
           x: Number(curRenderBother._offsetLeft),
           y: Number(curRenderBother._offsetTop),
         }
+        const imgRenderStyle // 获取图片渲染到画布中的信息
+        = {
+          x: Number(curRenderBother.renderStyle.width),
+          y: Number(curRenderBother.renderStyle.height),
+          transform: curRenderBother.renderStyle.transform
+        }
         if (curRenderBother) {
             this.curRender.curFrameInfo = curRenderBother
             
@@ -242,7 +248,16 @@ class Role {
             let renderXInCanvas = Math.round(x - centerOriginxy.x)
             let renderYInCanvas = Math.round(y - centerOriginxy.y)
             try {
-              ctx.drawImage(Img, offset.x, offset.y,imgSize.x, imgSize.y, renderXInCanvas, renderYInCanvas, imgSize.x, imgSize.y)
+              switch(imgRenderStyle.transform) { // 
+                case 'turnX': 
+                    ctx.save()
+                    ctx.translate(renderXInCanvas + imgRenderStyle.x, renderYInCanvas)
+                    ctx.scale(-1, 1)
+                    ctx.drawImage(Img, offset.x, offset.y,imgSize.x, imgSize.y, 0, 0, imgSize.x, imgSize.y)
+                    ctx.restore()
+                  break;
+                default: ctx.drawImage(Img, offset.x, offset.y,imgSize.x, imgSize.y, renderXInCanvas, renderYInCanvas, imgRenderStyle.x, imgRenderStyle.y)
+              }
               if (debug) {
                 // 图片描边
                 drawPolygon({ ctx, color: '#fff' }, [renderXInCanvas,
