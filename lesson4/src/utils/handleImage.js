@@ -29,3 +29,23 @@ export const generateFrameList = function (imageFrameInfoArr) {
     })
     return imageFrameInfoArr
 }
+
+/**
+ * 生成固定位置图片
+ */
+export const generateStaticImage = function (backgroundImageInfo, arr) {
+    let result = []
+    arr.forEach(([name, x, y]) => {
+        let [imgName, offsetLeft, offsetTop, width, height, ] = backgroundImageInfo[name].split(" | ")
+        result.push({
+            img: imgName,
+            offsetLeft: Number(offsetLeft),
+            offsetTop: Number(offsetTop),
+            width: Number(width), 
+            height: Number(height),
+            x: Number(x),
+            y: Number(y)
+        })
+    })
+    return result
+}

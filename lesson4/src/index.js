@@ -3,8 +3,9 @@ import { loadInitResources } from "./utils/resources"
 import { role01 } from "./data/role"
 import { mainRole } from "./data/roleEvents"
 import { getBulkBorder } from "./utils/collisionDetection"
-import { drawPolygon, drawDot } from "./utils/canvasTool"
+import { drawPolygon, drawDot, drawStaticImageOfMap } from "./utils/canvasTool"
 import { addGameListener } from "./utils/addGameListener"
+import { map01 } from "./data/map"
 
 const drawFPS = function (ctx, gameFPS) {
     ctx.font = '20px Arial'
@@ -12,6 +13,11 @@ const drawFPS = function (ctx, gameFPS) {
     let FPSText = 'FPS:  ' + gameFPS
     ctx.direction = 'ltr'
     ctx.fillText(FPSText, 10, 20)
+    // 追加渲染鼠标位置
+    const { distanceMapX, distanceMapY } = window.__game.clientInfo
+    const { x, y } = window.__game.mousePosition
+    let mouseDetail = '鼠标:(' + x + ',' + y + "), 地图内xy:(" + (x + distanceMapX) + "," +  (y + distanceMapY) + ")"
+    ctx.fillText(mouseDetail, 10, 580)
 }
 
 class Game {
@@ -21,18 +27,25 @@ class Game {
     keyCollect = [] // 当前活跃的按键
     keyCollectBuffer = [] // 活跃过的按键在缓冲区待一阵
     debug = 1
+    mousePosition = {
+        x: 0,
+        y: 0,
+    }
     gameFPS = 60
     gameG = 10 * 50 // 多少像素表示一米, g直接粗暴取10
     currentFrameIndexPerSeconde = 0
     gameStatus = {
         loading: false
     }
-    helloWorldPosition = {
-        x: 0,
-        directionRight: true,
-        y: 0,
-        directionBottom: true
+    clientInfo = {
+        width: 1024, // 视口的宽度
+        height: 600, // 视口的高度
+        distanceMapX: 0, // 视口距离地图左侧
+        distanceMapY: 400, // 视口距离地图顶部
+        paddingX: 100, // 角色距离两侧多少像素可以推动屏幕
+        paddingY: 100, // 角色距离上下多少像素可以推动屏幕
     }
+    mapInfo = null
 
     /**
      * 每一帧执行的行为
@@ -57,9 +70,23 @@ class Game {
             })
         })
 
+        // 绘制底层地图层 drawMap
+        this.mapInfo && this.mapInfo.backImage && this.mapInfo.backImage.forEach(v => {
+            drawStaticImageOfMap(v, ctx)
+        })
+
+        // 过滤全部的待绘制内容, 只绘制在视口区域需要展示的
+
+        // 遍历然后绘制全部内容
+
         // 执行render行为
         this.allRenderList.forEach(v => {
             v.render && v.render({ ctx, debug: this.debug })
+        })
+
+        // 绘制顶层装饰层
+        this.mapInfo && this.mapInfo.frontImage && this.mapInfo.frontImage.forEach(v => {
+            drawStaticImageOfMap(v, ctx)
         })
 
         // 打印FPS
@@ -97,6 +124,7 @@ class Game {
         window.requestAnimationFrame(() => {
             this.run()
         })
+        return this;
     }
 
     keyActiveCollect(handle, key) {
@@ -375,12 +403,18 @@ console.log(role01)
 
 
 loadInitResources(() => {
-    console.log("window.resources", window.resources)
-    __game.start()
-
+    __game.start().mapInfo = map01
 
     // 添加新的角色进入游戏
     let newRole001 = new Role(role01)
-    newRole001.addPosition({ x: 300, y: 400 }).addAction('action', mainRole, { needTrigger: true, codeDownTime: 0 })
+    newRole001.addPosition({ x: 300, y: 200 }).addAction('action', mainRole, { needTrigger: true, codeDownTime: 0 })
     __game.addNewRole(newRole001)
+
+    // 增加canvas上的monseMove以方便调试
+    document.querySelector('#canvas').onmousemove = (e) => {
+        window.__game.mousePosition.x = e.offsetX
+        window.__game.mousePosition.y = e.offsetY
+    }
 })
+
+

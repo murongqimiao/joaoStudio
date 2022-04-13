@@ -16,3 +16,18 @@ export const jumpHeightVariationByGravity = (currentFrame, totalTime) => {
     const absTime = Math.abs(halfTime - currentTime)
     return maxHeight - ((1/2) * g * absTime * absTime)
 }
+
+/**
+ * 重力影响下的自由落体
+ * @param {*} currentFrame
+ * @returns  {number} 当前距离初始点的偏移量
+ */
+export const freeFalling = (currentFrame, totalTime) => {
+    const g = window.__game.gameG
+    let currentTime = currentFrame *  1 / window.__game.gameFPS
+    if (currentTime > 120) {
+        currentTime = 120 // 限制一个最大速度
+    }
+    const currentVariationOfY = 1/2 * g * currentTime * currentTime
+    return currentVariationOfY
+}

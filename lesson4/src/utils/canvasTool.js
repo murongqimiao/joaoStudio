@@ -67,3 +67,21 @@ export const regressOrigin = function (points, left, top) {
 export const flatArr = function (arr) {
     return arr.join(",").split(",").map(i => Number(i))
 }
+
+
+/**
+ * drawStaticImageOfMap
+ */
+export const drawStaticImageOfMap = (v, ctx) => {
+    const { img, width, height, offsetLeft, offsetTop, x, y } = v
+    const { distanceMapX, distanceMapY } = window.__game.clientInfo
+    const _x = x - distanceMapX
+    const _y = y - distanceMapY
+    try {
+        let Image = window.resources[v.img]
+        ctx.drawImage(Image, offsetLeft, offsetTop, width, height, _x, _y, width, height)
+    } catch (err) {
+        console.log("=========绘制地图backImage error============")
+        console.log(err)
+    }
+}

@@ -77,3 +77,28 @@ export const imgFrameInfo = {
         '_role_001_6_down_0 | 0 | 0 | 71 | 53 | 35 | 53 | null | 15 | 5 | 10 | 61 | 43',
     ],
 }
+
+export const backgroundImageInfo = {
+    // name | _offsetLeft | _offsetTop | width | height 
+    'villageBrickCenter01': '_map_wm_wm00001 | 0 | 0 | 90 | 60',
+    'villageBrickCenter02': '_map_wm_wm00002 | 0 | 0 | 90 | 60',
+    'villageBrickCenter03': '_map_wm_wm00003 | 0 | 0 | 90 | 60',
+    'villageBrickCenter04': '_map_wm_wm00004 | 0 | 0 | 90 | 60',
+    'villageBrickCenter05': '_map_wm_wm00005 | 0 | 0 | 90 | 60',
+    'villageBrickLeft01': '_map_wsl_wsl00001 | | 0 | 0 | 30 | 60',
+    'villageBrickLeft02': '_map_wsl_wsl00002 | 0 | 0 | 30 | 60',
+    'villageBrickRight01': '_map_wsr_wsr00001 | 0 | 0 | 30 | 60',
+    'villageBrickRight01': '_map_wsr_wsr00002 | 0 | 0 | 30 | 60',
+
+}
+
+
+export const frontImageInfo = {
+    // name | _offsetLeft | _offsetTop | width | height 
+    'villageGrass01': '_map_ft_ft00001 | 0 | 0 | 54 | 37',
+    'villageGrass02': '_map_ft_ft00002 | 0 | 0 | 55 | 37',
+    'villageGrass03': '_map_ft_ft00003 | 0 | 0 | 45 | 37',
+    'villageGrass04': '_map_ft_ft00004 | 0 | 0 | 45 | 37',
+    'villageGrassSlant01': '_map_fst_fst00001 | 0 | 0 | 90 | 90', // 向右上方走
+    'villageGrassSlant02': '_map_fst_fst00002 | 0 | 0 | 90 | 90', // 向左上方走
+}
