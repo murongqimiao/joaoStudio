@@ -47,7 +47,7 @@ export const drawPolygon = ({ ctx, color = 'red', width = 1 }, pointSet) => {
  * result = [0.5, 1, 1.5, 2, 2.5, 3]
  */
 export const scalePoints = (arr, scale) => {
-    return arr.map(v => v.map(k => k * scale))
+    return arr.map(v => v.map(k => Number(k) * scale))
 }
     
 /**

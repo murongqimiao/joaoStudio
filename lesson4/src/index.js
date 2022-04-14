@@ -79,14 +79,24 @@ class Game {
 
         // 遍历然后绘制全部内容
 
+
         // 执行render行为
         this.allRenderList.forEach(v => {
             v.render && v.render({ ctx, debug: this.debug })
         })
 
+      
+
         // 绘制顶层装饰层
         this.mapInfo && this.mapInfo.frontImage && this.mapInfo.frontImage.forEach(v => {
             drawStaticImageOfMap(v, ctx)
+        })
+
+        // 绘制障碍物区域
+        this.mapInfo && this.mapInfo.obstacle && this.mapInfo.obstacle.forEach(v => {
+            drawPolygon({ ctx, color: "orange" }, v.content.join('_').split('_').map((item, index) => {
+                return index % 2 === 0 ? item - this.clientInfo.distanceMapX : item - this.clientInfo.distanceMapY
+            }))
         })
 
         // 打印FPS
@@ -403,6 +413,10 @@ console.log(role01)
 
 
 loadInitResources(() => {
+    setInterval(() => {
+        window.__game.getFPS()
+    }, 1000);
+
     __game.start().mapInfo = map01
 
     // 添加新的角色进入游戏

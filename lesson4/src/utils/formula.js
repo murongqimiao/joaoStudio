@@ -22,7 +22,7 @@ export const jumpHeightVariationByGravity = (currentFrame, totalTime) => {
  * @param {*} currentFrame
  * @returns  {number} 当前距离初始点的偏移量
  */
-export const freeFalling = (currentFrame, totalTime) => {
+export const freeFalling = (currentFrame) => {
     const g = window.__game.gameG
     let currentTime = currentFrame *  1 / window.__game.gameFPS
     if (currentTime > 120) {
