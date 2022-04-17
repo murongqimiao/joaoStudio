@@ -6,6 +6,7 @@ import { getBulkBorder } from "./utils/collisionDetection"
 import { drawPolygon, drawDot, drawStaticImageOfMap } from "./utils/canvasTool"
 import { addGameListener } from "./utils/addGameListener"
 import { map01 } from "./data/map"
+import { checkMapRemora } from "./utils/drawMap"
 
 const drawFPS = function (ctx, gameFPS) {
     ctx.font = '20px Arial'
@@ -68,6 +69,38 @@ class Game {
                     triggerItem.curTime++
                 }
             })
+            if (v.oldPosition) { // 移动过的元素才需要进行碰撞检测
+                this.allRenderList.forEach((item, itemIndex) => {
+                    // 这里检测体积的碰撞
+                    if (v.currentId !== item.currentId
+                        && v.curRender.curFrameInfo
+                        && v.curRender.curFrameInfo.shape
+                        && item.curRender.curFrameInfo
+                        && item.curRender.curFrameInfo.shape
+                        && collisionDetection(v, item)
+                    ) {
+                        // has crash
+                        v.onCrash && v.onCrash(v, item, this)
+                        // use postion before creash occur
+                        if (v.oldPosition &&
+                            v.curRender.curFrameInfo.volumeInfo.slice(-1) === '1' &&
+                            item.curRender.curFrameInfo.volumeInfo.slice(-1) === '1') {
+                            // solid crash with solid thing need back old position
+                            v.position = JSON.parse(JSON.stringify(v.oldPosition))
+                            // console.log("=============v==================", v)
+                            delete v.oldPosition
+                        }
+                    }
+
+                    // 这里检测地图障碍物
+                    const _checkMapRemora = checkMapRemora.bind(this)
+                    if (!_checkMapRemora(this.mapInfo.obstacle, v,() => {}, () => {}).every(v => v)) {
+                        // 发生碰撞
+                        v.position = JSON.parse(JSON.stringify(v.oldPosition))
+                        delete v.oldPosition
+                    }
+                })
+            }
         })
 
         // 绘制底层地图层 drawMap
@@ -421,7 +454,7 @@ loadInitResources(() => {
 
     // 添加新的角色进入游戏
     let newRole001 = new Role(role01)
-    newRole001.addPosition({ x: 300, y: 200 }).addAction('action', mainRole, { needTrigger: true, codeDownTime: 0 })
+    newRole001.addPosition({ x: 300, y: 100 }).addAction('action', mainRole, { needTrigger: true, codeDownTime: 0 })
     __game.addNewRole(newRole001)
 
     // 增加canvas上的monseMove以方便调试

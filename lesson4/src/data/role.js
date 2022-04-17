@@ -16,7 +16,7 @@ export const role01 = {
         isHero: true,
         maxHp:  CONSTANT_COMMON.BASE_HERO_HP,
         jumpDuration: 1, // 跳跃浮空时间
-        jumpTime: 2, // 可跳跃次数
+        jumpTime: 1, // 可跳跃次数
         volumeInfo: {
             shape: 'rectangle',
             width: 30,

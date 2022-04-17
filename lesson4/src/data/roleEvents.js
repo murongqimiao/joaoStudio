@@ -27,21 +27,21 @@ import { checkMapRemora } from "../utils/drawMap"
         // 正在跳跃需要计算偏移量
         const positionYVaraition = jumpHeightVariationByGravity(this.curRender.jumpFrame, this.state.jumpDuration)
         this.addPosition(Object.assign(oldPosition, { y: this.position.y - positionYVaraition }))
-        // if (this.curRender.jumpFrame >= this.curRender.jumpMaxFrame) {
-        //     this.curRender.jumping = false
-        //     this.curRender.curFrameImgIndex = 0
-        //     this.curRender.curFrame = 0
-        //     this.curEvent = direction + '_stand'
-        // }
         this.curRender.jumpFrame++
         this.position.y =  this.curRender.jumpInitPositionY - positionYVaraition
     }
     /** 结束 **/
 
+    // 过滤部分行为
+    if (computedKeyList.includes('X') && !this.curRender.jumping) {
+        // 摁住攻击键忽略移动, 既攻击行为为第一优先级
+        computedKeyList = computedKeyList.filter(v => !['J', 'L'].includes(v))
+    }
     if (computedKeyList.includes('J') && computedKeyList.includes('L')) {
         // 左右同时按住等于相互抵消
         ['J', 'L'].forEach(key => computedKeyList.splice(computedKeyList.indexOf(key)))
-    } else if (computedKeyList.includes('I') && computedKeyList.includes('K')) {
+    }
+    if (computedKeyList.includes('I') && computedKeyList.includes('K')) {
         // 上下同时按住等于相互抵消
         ['I', 'K'].forEach(key => computedKeyList.splice(computedKeyList.indexOf(key)))
     }
@@ -116,7 +116,7 @@ import { checkMapRemora } from "../utils/drawMap"
             }
         },
         {
-            variationY: 1 // config
+            variationY: 4 // config
         }
     )
 
@@ -134,10 +134,8 @@ import { checkMapRemora } from "../utils/drawMap"
                     this.curRender.jumpFrame = 0
                     this.curRender.jumpMaxFrame = Math.round(this.state.jumpDuration * game.gameFPS)
                     this.curRender.jumpInitPositionY = this.position.y // 记录当前position 用来做参照
-                    console.log("=======jumpInitPositionY=========", this.curRender.jumpInitPositionY)
                 }
             }
-            
             if (check(['L', 'J'])) {
             } else if (check(['L'])) {
                 this.addPosition(Object.assign(oldPosition, { x: this.position.x + variation, y: this.position.y }))
@@ -147,36 +145,29 @@ import { checkMapRemora } from "../utils/drawMap"
           
             break;
         case '6_run':
-            if (!_checkMapRemora(obstacle, this,() => {}, () => {}, { variationX: -1 * variation }).every(v => v)) {
-                // 撞墙
-                if (!_checkMapRemora(obstacle, this,() => {}, () => {}, { variationX: -1 * variation, variationY: -1 * variation, }).every(v => v)) {
-                    return
-                } else {
-                    this.addPosition(Object.assign(oldPosition, { x: this.position.x - variation, y: this.position.y }))
-                }
-                
-            } else {
-                this.addPosition(Object.assign(oldPosition, { x: this.position.x - variation, y: this.position.y }))
-            }
-            if (this.curRender.jumping) { this.curEvent = '6_jump' }
-            break
         case '2_run':
-            if (!_checkMapRemora(obstacle, this,() => {}, () => {}, { variationX: variation }).every(v => v)) {
-                // 撞墙
-                // let variationX = Math.floor(Math.sqrt(variation, 2))
-                // let variationY = -1 * (Math.ceil(Math.sqrt(variation, 2)) + 1)
-                let variationX = variation
-                let variationY = -1 * (variation + 1)
-                if (!_checkMapRemora(obstacle, this,() => {}, () => {}, { variationX, variationY }).every(v => v)) {
-                    return
-                } else {
-                    this.addPosition(Object.assign(oldPosition, { x: this.position.x + variationX, y: this.position.y + variationY }))
-                }
-                
-            } else {
-                this.addPosition(Object.assign(oldPosition, { x: this.position.x + variation, y: this.position.y }))
+            let right = direction == '2' ? 1 : -1 // 移动方向是否往右
+            let variationX = variation * right
+            let variationY = variation * 0.68 // 上坡下坡斜率在0.6左右
+            if (this.curRender.jumping) {
+                this.addPosition(Object.assign(oldPosition, { x: this.position.x + variationX, y: this.position.y }))
+            } else if (_checkMapRemora(obstacle, this,() => {}, () => {}, { variationX, variationY: variationY }).every(v => v)) { // 先检测是否可以向下走
+                this.addPosition(Object.assign(oldPosition, { x: this.position.x + variationX, y: this.position.y + variationY }))
+            } else if (_checkMapRemora(obstacle, this,() => {}, () => {}, { variationX }).every(v => v)) {
+                // 检测平着走
+                this.addPosition(Object.assign(oldPosition, { x: this.position.x + variationX, y: this.position.y }))
+            } else if (_checkMapRemora(obstacle, this,() => {}, () => {}, { variationX, variationY: (-1 * variationY) }).every(v => v)) {
+                // 检测是否可以往上方走
+                this.addPosition(Object.assign(oldPosition, { x: this.position.x + variationX, y: this.position.y + (-1 * variationY) }))
             }
-            if (this.curRender.jumping) { this.curEvent = '2_jump' }
+            if (this.curRender.jumping) {
+                if (newEvent === '6_run') {
+                    this.curEvent = '6_jump'
+                }
+                if (newEvent === '2_run') [
+                    this.curEvent = '2_jump'
+                ]
+            }
             break
 
         case '2_attack':
@@ -190,6 +181,12 @@ import { checkMapRemora } from "../utils/drawMap"
             break;
         case '2_down':
         case '6_down':
+            if (check(['K', 'C'])) {
+                // 如果摁着X 要考虑能否跳过下面的障碍物
+                if (_checkMapRemora(obstacle, this,() => {}, () => {}, { variationY: 10 }).every(v => v)) {
+                    this.addPosition(Object.assign(oldPosition, { x: this.position.x + variation, y: this.position.y + 10 }))
+                }
+            }
             break;
         default:
             if (this.curEvent !== direction + '_stand') { // 恢复到兜底状态也需要重置图像的帧数

@@ -90,13 +90,26 @@ import { backgroundImageInfo, frontImageInfo } from "./common"
          ['villageGrass04', '900', '603'],
          ['villageGrass04', '940', '603'],
          ['villageGrass01', '960', '603'],
-        //  ['villageGrass03', '700', '610'],
-        //  ['villageGrass04', '720', '610'],
+         ['villageGrass03', '700', '610'],
+         ['villageGrass04', '720', '610'],
+         // 第二层
+         ['villageGrass01', '240', '580'],
+         ['villageGrass04', '280', '580'],
+         ['villageGrass03', '320', '580'],
+         ['villageGrass03', '360', '580'],
+         ['villageGrass04', '400', '580'],
+         ['villageGrass04', '440', '580'],
+         ['villageGrass02', '480', '580'],
+         ['villageGrass04', '520', '580'],
+         ['villageGrass02', '560', '580'],
 
          
      ]),
      obstacle: [{ // 障碍物集合, type out意思是必须在此区域外, type in意思是必须在此区域内
-         content: ["0_796", "390_796", "663_616", "1008_620", "1008_1000", "0_1000"],
+         content: ["0_796", "390_796", "663_616", "1008_616", "1008_1000", "0_1000"],
          type: "out",
+     }, {
+         content: ['245_600','245_604', '611_604', '611_600'],
+         type: "out"
      }]
  }

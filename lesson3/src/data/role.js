@@ -15,7 +15,7 @@ export const role01 = {
         spd: CONSTANT_COMMON.BASE_HERO_SPD,
         isHero: true,
         maxHp:  CONSTANT_COMMON.BASE_HERO_HP,
-        jumpDuration: 1, // 跳跃浮空时间
+        jumpDuration: 2, // 跳跃浮空时间
         jumpTime: 2, // 可跳跃次数
         volumeInfo: {
             shape: 'rectangle',
