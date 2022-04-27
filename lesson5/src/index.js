@@ -7,6 +7,7 @@ import { drawPolygon, drawDot, drawStaticImageOfMap } from "./utils/canvasTool"
 import { addGameListener } from "./utils/addGameListener"
 import { map01 } from "./data/map"
 import { checkMapRemora } from "./utils/drawMap"
+import { getMainViewportPostion } from "./utils/positionReset"
 
 const drawFPS = function (ctx, gameFPS) {
     ctx.font = '20px Arial'
@@ -43,7 +44,7 @@ class Game {
         height: 600, // 视口的高度
         distanceMapX: 0, // 视口距离地图左侧
         distanceMapY: 400, // 视口距离地图顶部
-        paddingX: 100, // 角色距离两侧多少像素可以推动屏幕
+        paddingX: 300, // 角色距离两侧多少像素可以推动屏幕
         paddingY: 100, // 角色距离上下多少像素可以推动屏幕
     }
     mapInfo = null
@@ -58,6 +59,8 @@ class Game {
         const that = this;
 
         this.updateAllRenderList()
+
+      
 
         // 触发绑定过的事件
         this.allRenderList.forEach(v => {
@@ -103,6 +106,16 @@ class Game {
             }
         })
 
+        // 根据主角的位置, 动态调整地图背景的位置
+        let rolePosition = this.roleList[0].position
+        const { distanceMapX, distanceMapY, width, height, paddingX, paddingY  } = this.clientInfo
+        if (rolePosition.x - distanceMapX < paddingX && distanceMapX > 0) {
+            this.clientInfo.distanceMapX = this.clientInfo.distanceMapX - (paddingX - (rolePosition.x - distanceMapX))
+        }
+        if (rolePosition.x + paddingX > (distanceMapX + width)) {
+            this.clientInfo.distanceMapX = this.clientInfo.distanceMapX + (rolePosition.x + paddingX - (distanceMapX + width))
+        }
+
         // 绘制底层地图层 drawMap
         this.mapInfo && this.mapInfo.backImage && this.mapInfo.backImage.forEach(v => {
             drawStaticImageOfMap(v, ctx)
@@ -110,7 +123,7 @@ class Game {
 
         // 过滤全部的待绘制内容, 只绘制在视口区域需要展示的
 
-        // 遍历然后绘制全部内容
+
 
 
         // 执行render行为
@@ -341,8 +354,8 @@ class Role {
         if (curRenderBother) {
             this.curRender.curFrameInfo = curRenderBother
             
-            // const { x, y } = getMainViewportPostion(this.position) // 目前不计算相对地图位置的回归数据
-            const { x, y } = this.position
+            const { x, y } = getMainViewportPostion(this.position)
+            // const { x, y } = this.position
 
             let renderXInCanvas = Math.round(x - centerOriginxy.x)
             let renderYInCanvas = Math.round(y - centerOriginxy.y)
@@ -384,8 +397,8 @@ class Role {
                         break;
                     default: () => { }
                 }
-                // drawDot({ ctx, color: 'yellow' }, [getMainViewportPostion(this.position).x, getMainViewportPostion(this.position).y, 1] )
-                drawDot({ ctx, color: 'yellow' }, [x, y, 1] )
+                drawDot({ ctx, color: 'yellow' }, [getMainViewportPostion(this.position).x, getMainViewportPostion(this.position).y, 1] )
+                // drawDot({ ctx, color: 'yellow' }, [x, y, 1] )
             }
         }
 
@@ -454,7 +467,7 @@ loadInitResources(() => {
 
     // 添加新的角色进入游戏
     let newRole001 = new Role(role01)
-    newRole001.addPosition({ x: 300, y: 100 }).addAction('action', mainRole, { needTrigger: true, codeDownTime: 0 })
+    newRole001.addPosition({ x: 800, y: 500 }).addAction('action', mainRole, { needTrigger: true, codeDownTime: 0 })
     __game.addNewRole(newRole001)
 
     // 增加canvas上的monseMove以方便调试

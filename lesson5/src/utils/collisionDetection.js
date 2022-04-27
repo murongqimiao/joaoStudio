@@ -38,8 +38,8 @@ export const collisionDetection = (objectA, objectB) => {
  */
 export const getBulkBorder = (bulk, xywhs, centerOriginxy, imgSize) => {
     let x1,y1,x2,y2,x3,y3,x4,y4
-    // const { x, y } = getMainViewportPostion(bulk.position)
-    const { x, y } = bulk.position
+    const { x, y } = getMainViewportPostion(bulk.position)
+    // const { x, y } = bulk.position
     if (!xywhs) { xywhs = getXYWHSByString(bulk.curRender.curFrameInfo.volumeInfo) }
     if (!centerOriginxy) { centerOriginxy = getCenterOriginByString(bulk.curRender.curFrameInfo.centerOrigin) }
     if (!imgSize) { imgSize = getCenterOriginByString(bulk.curRender.curFrameInfo.imgSizeInfo) }

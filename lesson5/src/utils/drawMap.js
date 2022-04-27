@@ -63,7 +63,8 @@ export const checkMapRemora = function(mapRule, v, fail, success, config) {
     let checkResult = mapRule.map(mapRuleItem => {
         let _scaledPoints = scalePoints(mapRuleItem.content.map(item => item.split("_")), 1) // 缩放map坐标体系
         let _regressedOriginPoints = regressOrigin(_scaledPoints,distanceMapX, distanceMapY) // 回归canvas 坐标体系
-        let checkResult = checkPointInMap(_scaledPoints, { x: v.position.x + distanceMapX + variationX, y: v.position.y + distanceMapY + variationY}, mapRuleItem.type)
+        let checkResult = checkPointInMap(_scaledPoints, { x: v.position.x + variationX, y: v.position.y + variationY}, mapRuleItem.type)
+        // let checkResult = checkPointInMap(_scaledPoints, { x: v.position.x + distanceMapX + variationX, y: v.position.y + distanceMapY + variationY}, mapRuleItem.type)
         return checkResult
     })
     if (v.oldPosition && checkResult.some(v => v === false)) {

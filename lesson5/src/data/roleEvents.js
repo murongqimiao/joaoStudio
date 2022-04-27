@@ -197,10 +197,5 @@ import { checkMapRemora } from "../utils/drawMap"
             }
     }
 
-    
-
-    
-
-
     return this;
 }

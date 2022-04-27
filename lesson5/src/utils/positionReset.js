@@ -21,9 +21,9 @@ export const initCanvasWidthMainViewportInfo = function () {
  * 通过主视口距离地图左上角的位置来计算相对于视口的坐标
  */
 export const getMainViewportPostion = function (position) {
-    const { leftDistances, topDistances, scale } = window.__game.mainViewportPosition
+    const { distanceMapX, distanceMapY } = window.__game.clientInfo
     // 坐标回归计算需要扣除canvas距离map左上角的leftDistances和topDistances
-    return  { x: position.x - leftDistances, y: position.y - topDistances }
+    return  { x: position.x - distanceMapX, y: position.y - distanceMapY }
 }
 
 /**
