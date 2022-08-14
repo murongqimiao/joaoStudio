@@ -23,32 +23,37 @@ const drawFPS = function (ctx, gameFPS) {
 }
 
 class Game {
-    roleList = []
-    environmentList = [] // 环境资源
-    allRenderList = [] 
-    keyCollect = [] // 当前活跃的按键
-    keyCollectBuffer = [] // 活跃过的按键在缓冲区待一阵
-    debug = 1
-    mousePosition = {
-        x: 0,
-        y: 0,
+    constructor(props) {
+      this.roleList = []
+      this.environmentList = [] // 环境资源
+      this.allRenderList = [] 
+      this.keyCollect = [] // 当前活跃的按键
+      this.keyCollectBuffer = [] // 活跃过的按键在缓冲区待一阵
+      this.debug = 1
+      this.mousePosition = {
+          x: 0,
+          y: 0,
+      }
+      this.gameFPS = 60
+      this.gameG = 10 * 50 // 多少像素表示一米, g直接粗暴取10
+      this.currentFrameIndexPerSeconde = 0
+      this.gameStatus = {
+          loading: false
+      }
+      this.clientInfo = {
+          width: 1024, // 视口的宽度
+          height: 600, // 视口的高度
+          distanceMapX: 0, // 视口距离地图左侧
+          distanceMapY: 400, // 视口距离地图顶部
+          paddingX: 300, // 角色距离两侧多少像素可以推动屏幕
+          paddingY: 100, // 角色距离上下多少像素可以推动屏幕
+      }
+      this.mapInfo = null
     }
-    gameFPS = 60
-    gameG = 10 * 50 // 多少像素表示一米, g直接粗暴取10
-    currentFrameIndexPerSeconde = 0
-    gameStatus = {
-        loading: false
-    }
-    clientInfo = {
-        width: 1024, // 视口的宽度
-        height: 600, // 视口的高度
-        distanceMapX: 0, // 视口距离地图左侧
-        distanceMapY: 400, // 视口距离地图顶部
-        paddingX: 300, // 角色距离两侧多少像素可以推动屏幕
-        paddingY: 100, // 角色距离上下多少像素可以推动屏幕
-    }
-    mapInfo = null
 
+    loadSceneResouce() {
+      // 加载场景资源
+    }
     /**
      * 每一帧执行的行为
      */
